@@ -1,6 +1,5 @@
-/entidades/
-/principal/
-/util/
-/META-INF/
-/entidadesDAO/
 /controlador/
+/entidades/
+/entidadesDAO/
+/principal/
+/META-INF/

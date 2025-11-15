@@ -28,6 +28,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.*;
 
+import controlador.UsuariosService;
 import entidades.Persona;
 import entidades.Artista;
 import entidades.Coordinador;
@@ -42,18 +43,19 @@ import entidades.Sesion;
 public class Principal {
 
 	static Scanner leer = new Scanner(System.in);
+	
+	static UsuariosService usuariosService= null;
 
-	static ArrayList<Persona> credencialesSistema = null;
 	static ArrayList<Espectaculo> espectaculos = null;
 	static Map<String, String> paises = null;
-	static Sesion actual = new Sesion();
+
 
 	public static void main(String[] args) {
 
 		// Comenzamos configurando el programa
 
 		cargarProperties();
-		credencialesSistema = cargarCredenciales();
+		usuariosService = new UsuariosService();
 		espectaculos = cargarEspectaculos();
 		paises = cargarPaises();
 
@@ -66,7 +68,7 @@ public class Principal {
 		int opcion = -1;
 		Boolean v = false;
 		do {
-			mostrarMenuSesion(actual);
+			System.out.println("Menu Invitado");
 			System.out.println("Elige una opcion: \n\t1. Ver espectaculos\n\t2. " + "Log IN\n\t3. Salir");
 
 			do {
@@ -87,10 +89,23 @@ public class Principal {
 				mostrarEspectaculos();
 				break;
 			case 2:
-				Persona usuarioIntento = login(credencialesSistema);
+				String usuario, password;
+				Persona usuarioLogueado = null;
+
+				do {
+					System.out.println("Introduce tu nombre de usuario");
+					usuario = leer.nextLine();
+				} while (usuario == null);
+
+				do {
+					System.out.println("Introduce tu contraseña");
+					password = leer.nextLine();
+				} while (password == null);
+				
+				Persona usuarioIntento = usuariosService.login(usuario, password);
+				
 				if (usuarioIntento != null) {
-					actual = new Sesion(usuarioIntento);
-					switch (actual.getPerfilActual()) {
+					switch (usuarioIntento.getPerfil()) {
 					case ARTISTA:
 						menuArtista();
 						break;
@@ -222,7 +237,7 @@ public class Principal {
 		long numCoor = -1;
 		Espectaculo nuevoEspectaculo;
 
-		if (actual.getPerfilActual() == Perfil.COORDINACION) {
+		if (usuariosService.getSesion().getPerfilActual() == Perfil.COORDINACION) {
 			do {
 				System.out.println("introduce el nombre del espectaculo" + "\n(debe tener un maximo de 25 caracteres)");
 				nombrePrueba = leer.nextLine();
@@ -264,7 +279,7 @@ public class Principal {
 			numeros.add(numero2);
 			numeros.add(numero3);
 			long id = espectaculos.size() + 1;
-			Coordinador coordinadorActual = (Coordinador) actual.getUsuActual();
+			Coordinador coordinadorActual = (Coordinador) usuariosService.getSesion().getUsuActual();
 			nuevoEspectaculo = new Espectaculo(id, nombre, fechaIni, fechaFin, numeros, coordinadorActual);
 			System.out.println("Espectaculo creado con exito.");
 		} else {
@@ -316,7 +331,7 @@ public class Principal {
 			Coordinador coordinadorElegido = null;
 			Boolean coordinadorEncontrado = false;
 			do {
-				for (Persona c : credencialesSistema) {
+				for (Persona c : usuariosService.getCredencialesSistema()) {
 					if (c.getPerfil() == Perfil.COORDINACION) {
 						System.out.println(c.getId() + " - " + c.getNombre());
 					}
@@ -333,7 +348,7 @@ public class Principal {
 					}
 				} while (!v);
 
-				for (Persona c : credencialesSistema) {
+				for (Persona c : usuariosService.getCredencialesSistema()) {
 					if (c.getPerfil() == Perfil.COORDINACION && c.getId() == numCoor) {
 						if (c instanceof Coordinador) {
 							coordinadorElegido = new Coordinador(c.getId(), c.getEmail(), nombre, c.getNacionalidad(),
@@ -406,20 +421,7 @@ public class Principal {
 		}
 	}
 
-	private static ArrayList<Persona> cargarCredenciales() {
-		ArrayList<Persona> personas = new ArrayList<>();
-		// leer el fichero de credenciales
-		ArrayList<String> lineas = leerFichero(ProgramProperties.credenciales);
 
-		for (String linea : lineas) {
-			if (linea.contains("coordinacion")) {
-				personas.add(new Coordinador(linea));
-			} else if (linea.contains("artista")) {
-				personas.add(new Artista(linea));
-			}
-		}
-		return personas;
-	}
 
 	private static ArrayList<String> leerFichero(String ruta) {
 		ArrayList<String> lineas = new ArrayList<>();
@@ -447,37 +449,6 @@ public class Principal {
 		return lineas;
 	}
 
-	private static Persona login(ArrayList<Persona> credenciales) {
-		String usuario, password;
-		Persona usuarioLogueado = null;
-
-		do {
-			System.out.println("Introduce tu nombre de usuario");
-			usuario = leer.nextLine();
-		} while (usuario == null);
-
-		do {
-			System.out.println("Introduce tu contraseña");
-			password = leer.nextLine();
-		} while (password == null);
-
-		if (usuario.equals(ProgramProperties.usuarioAdmin) && password.equals(ProgramProperties.passwordAdmin)) {
-			usuarioLogueado = new Persona(ProgramProperties.usuarioAdmin, ProgramProperties.passwordAdmin);
-		} else {
-			for (Persona p : credenciales) {
-				if (p.getCredenciales().getNombre().equals(usuario)
-						&& p.getCredenciales().getPassword().equals(password)) {
-					usuarioLogueado = p;
-				}
-			}
-		}
-		return usuarioLogueado;
-	}
-
-	public static void logOut() {
-		System.out.println("Has cerrado la sesion");
-		actual.setUsuActual(new Persona());
-	}
 
 	// MENUS
 	// MENU COORDINACION
@@ -487,7 +458,8 @@ public class Principal {
 	 */
 	public static void menuCoordinacion() {
 		int opcion = -1;
-		mostrarMenuSesion(actual);
+
+		System.out.println("Menu Coordinacion");
 		do {
 			System.out.println("Menu COORDINACION\nElige una opcion: \n\t1. Ver espectaculos\n\t.2 "
 					+ "Crear o Modificar espectaculos\n\t3. Log OUT\n\t4. Salir al meu anterior");
@@ -511,10 +483,10 @@ public class Principal {
 				guardarEspectaculo(crearEspectaculo());
 				break;
 			case 3:
-				logOut();
+				usuariosService.logOut();
 				break;
 			case 4:
-				logOut();
+				usuariosService.logOut();
 				System.out.println("Saliendo al menu anterior...");
 				break;
 			default:
@@ -530,7 +502,8 @@ public class Principal {
 	 */
 	public static void menuArtista() {
 		int opcion = -1;
-		mostrarMenuSesion(actual);
+
+		System.out.println("Menu Artista");
 		do {
 			System.out.println("Elige una opcion: \n\t1. Ver tu ficha\n\t2. Ver " + "espectaculos\n\t3. Log OUT");
 			Boolean v = false;
@@ -547,15 +520,14 @@ public class Principal {
 
 			switch (opcion) {
 			case 1:
-				System.out.println("--Ficha del artista--\nNombre: " + actual.getUsuActual().getNombre() + "\nID: "
-						+ actual.getUsuActual().getId());
+				usuariosService.mostrarFicha();
 
 				break;
 			case 2:
 				mostrarEspectaculos();
 				break;
 			case 3:
-				logOut();
+				usuariosService.logOut();
 
 				break;
 			default:
@@ -564,6 +536,8 @@ public class Principal {
 
 		} while (opcion != 3);
 	}
+
+
 
 	// MENU ADMIN
 	/**
@@ -574,23 +548,24 @@ public class Principal {
 	 */
 	public static void menuAdmin() {
 		int opcion = -1;
+		
 
-		mostrarMenuSesion(actual);
+		System.out.println("Menu Administrador");
 		do {
 			System.out.println("Elige una opcion: \n\t1. Ver espectaculos" + "\n\t2. Gestionar espectaculos"
 					+ "\n\t3. Gestionar personas y credenciales" + "\n\t4. Log OUT" + "\n\t5. Salir al menu anterior");
 
-			Boolean v = false;
+			Boolean validado = false;
 			do {
 				try {
 					opcion = leer.nextInt();
 					leer.nextLine();
-					v = true;
+					validado = true;
 				} catch (Exception e) {
 					System.out.println("debes introducir un numero");
 					leer.nextLine();
 				}
-			} while (!v);
+			} while (!validado);
 
 			switch (opcion) {
 			case 1:
@@ -605,52 +580,46 @@ public class Principal {
 				gestionarPersonas();
 				break;
 			case 4:
-				logOut();
+				usuariosService.logOut();
 				break;
 			case 5:
-				logOut();
+				usuariosService.logOut();
 				System.out.println("Saliendo al menu anterior...");
 				break;
 			default:
 				System.out.println("No has introducido una opcion valida." + " Por favor intentalo de nuevo.");
 			}
-		} while (opcion != 5);
+		} while (opcion < 4);
 	}
 
 	public static void gestionarPersonas() {
 		int opcion2 = -1;
-		Persona nueva = null;
 		do {
 			System.out.println("Que deseas hacer?");
 			System.out.println("\t1. Registrar persona\n\t2. " + "Gestionar datos artista o coordinador\n\t3. Salir al menu anterior");
 
-			Boolean v = false;
+			Boolean validado = false;
 			do {
 				try {
 					opcion2 = leer.nextInt();
 					leer.nextLine();
-					v = true;
+					validado = true;
 				} catch (Exception e) {
 					System.out.println("debes introducir un numero");
 					leer.nextLine();
 				}
-			} while (!v);
+			} while (!validado);
 
 			switch (opcion2) {
 			case 1:
 
-				do {
-					nueva = registrarPersona();
-					if (nueva != null) {
-						nueva.setId(credencialesSistema.size() + 1);
-						credencialesSistema.add(nueva);
-						persistirCredenciales();
-						System.out.println("Usuario registrado con éxito");
-					}
-				} while (nueva == null);
+				usuariosService.crearPersona(registrarPersona());
 				break;
 			case 2:
 
+				
+				
+				
 				break;
 			case 3:
 				System.out.println("Saliendo al menu anterior...");
@@ -662,6 +631,7 @@ public class Principal {
 
 		} while (opcion2 != 3);
 	}
+
 
 	public static void gestionarEscpectaculos() {
 		int opcion2 = -1;
@@ -716,7 +686,7 @@ public class Principal {
 		 */
 		System.out.println("introduce un email");
 		email = leer.nextLine();
-		if (!comprobarEmail(email)) {
+		if (!usuariosService.comprobarEmail(email)) {
 			System.out.println("Ese email ya esta registrado");
 			return null;
 		}
@@ -748,17 +718,17 @@ public class Principal {
 		do {
 			System.out.println("El usuario es Coordinador (1) o Artista (2)?");
 
-			Boolean v = false;
+			Boolean valido = false;
 			do {
 				try {
 					num = leer.nextInt();
 					leer.nextLine();
-					v = true;
+					valido = true;
 				} catch (Exception e) {
 					System.out.println("debes introducir un numero");
 					leer.nextLine();
 				}
-			} while (!v);
+			} while (!valido);
 			switch (num) {
 			case 1:
 				perfilUsu = Perfil.COORDINACION;
@@ -796,18 +766,18 @@ public class Principal {
 
 				perfilUsu = Perfil.ARTISTA;
 				System.out.println("el artista tiene apodo? (1-si , 2-no)");
-				Boolean vvv = false;
+				Boolean valido3 = false;
 				int num3 = -1;
 				do {
 					try {
 						num3 = leer.nextInt();
 						leer.nextLine();
-						vvv = true;
+						valido3 = true;
 					} catch (Exception e) {
 						System.out.println("debes introducir un numero");
 						leer.nextLine();
 					}
-				} while (!vvv);
+				} while (!valido3);
 
 				switch (num3) {
 				case 1:
@@ -887,48 +857,16 @@ public class Principal {
 			} else
 				System.out.println("contraseña no valida");
 		} while (passUsuario == null);
+		
+		
 		Credenciales credenciales = new Credenciales(nombreUsuario, passUsuario, perfilUsu);
-
 		return resultadoLogin = new Persona(-1, email, nombreUsuario, nacionalidad, credenciales, perfilUsu);
 	}
+	
+	
+	
 
-	public static void persistirCredenciales() {
-		try {
-			FileWriter writer = new FileWriter(ProgramProperties.credenciales);
-			String contenido = "";
-			for (Persona p : credencialesSistema) {
-				contenido += p.toFicheroCredenciales()+"\n";
-			}
-			writer.write(contenido);
-			writer.close();
-		} catch (IOException e) {
-			System.out.println("error al escribir el archivo");
-		}
-	}
 
-	public static Boolean comprobarEmail(String email) {
-		Boolean valido = true;
-		for (Persona p : credencialesSistema) {
-			if (p.getEmail() == email) {
-				System.out.println("Ese email ya está registrado en el sistema");
-				return false;
-			}
-		}
-		return valido;
-	}
-
-	public static Boolean comprobarNombreUsuario(String nombreUsuario) {
-		Boolean valido = true;
-		for (Persona p : credencialesSistema) {
-			if (p.getCredenciales().getNombre() == nombreUsuario) {
-				System.out.println("Ese nombre ya existe");
-				return false;
-			}
-		}
-		// Si no hemos fallado en ningún validador, construimos la Persona
-		// resultadoLogin = new Persona(..);
-		return valido;
-	}
 
 	public static void mostrarEspectaculos() {
 		ArrayList<Espectaculo> listaEspectaculos = new ArrayList<>();

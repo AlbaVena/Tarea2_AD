@@ -1,11 +1,1 @@
-1|luisdbb|MiP@ss|luisdbb@educastur.org|Luis de Blas|España|COORDINACION
-2|camila|cam1las|camilas@circo.es|Camila Sánchez|Bolivia|ARTISTA
-3|patrigc|patri|patriciagc@circo.es|Patricia González|España|ARTISTA
-4|alberto|alberto|alberto@circo.es|Alberto García|España|ARTISTA
-5|michael|Michael_33|michael@circo.es|Michael Lays|Estados Unidos|ARTISTA
-6|sonya|sonya|sonya@circo.es|Sonya Ladowick|Polonia|ARTISTA
-7|charles|$hws7^wq3mJk_d|charles@circo.es|Charles Brown|Alemania|ARTISTA
-8|rapha|rapha|raphael@circo.es|Raphael Costa|Italia|ARTISTA
-9|isabel|isabel|mijr@educastur.org|María Isabel Jardón|España|COORDINACION
-10|eusebio|eusebio85|eusebio85@gmail.com|Eusebio Prados-García|Venezuela|ARTISTA
-11|alba_v|mipassword|alba@email.com|alba_v|España|COORDINACION
+1|sunombre|contraseña|ajbd|sunombre|España|COORDINACION

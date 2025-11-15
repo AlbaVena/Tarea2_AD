@@ -67,21 +67,5 @@ public class Artista extends Persona {
 		this.numeros = numeros;
 	}
 
-	//Metodos:
-	public void mostrarFicha() {
-		if (apodo != null) {
-			System.out.println("Artista: "+nombre+"\nID: "+idArt+"\nApodo: "
-		+apodo+
-					"Especialidades:");
-			for (Especialidad especialidad : especialidades) {
-				System.out.println(especialidad);
-			}
-		}
-		else {
-			System.out.println("Artista: "+nombre+"\nEspecialidades:\n");
-			for (Especialidad especialidad : especialidades) {
-				System.out.println(especialidad);
-			}
-	}
-}
+
 }
