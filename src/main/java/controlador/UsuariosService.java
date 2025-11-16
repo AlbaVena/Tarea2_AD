@@ -12,6 +12,7 @@ import entidades.Coordinador;
 import entidades.Persona;
 import entidades.ProgramProperties;
 import entidades.Sesion;
+import entidadesDAO.PersonaDAO;
 
 public class UsuariosService {
 
@@ -129,8 +130,10 @@ public class UsuariosService {
 	public void crearPersona(Persona nueva) {
 		nueva.setId(credencialesSistema.size() + 1);
 		credencialesSistema.add(nueva);
-		persistirCredenciales();
-
+		//persistirCredenciales();
+		PersonaDAO pdao = new PersonaDAO();
+		//pdao.insertarUsuario(nueva);
+		System.out.println(pdao.insertarUsuario(nueva));
 	}
 
 	public void persistirCredenciales() {

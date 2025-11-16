@@ -26,6 +26,9 @@ public class PropertiesService {
 			ProgramProperties.credenciales = p.getProperty("credenciales");
 			ProgramProperties.espectaculos = p.getProperty("espectaculos");
 			ProgramProperties.paises = p.getProperty("paises");
+			ProgramProperties.url = p.getProperty("url");
+			ProgramProperties.dbuser = p.getProperty("dbuser");
+			ProgramProperties.dbpass = p.getProperty("dbpass");
 
 		} catch (FileNotFoundException e) {
 			System.out.println("No pude encontrar el fichero de properties");
