@@ -3,15 +3,11 @@ package principal;
 import java.io.BufferedReader;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -28,9 +24,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.*;
 
+import controlador.EspectaculosService;
+import controlador.PropertiesService;
 import controlador.UsuariosService;
 import entidades.Persona;
-import entidades.Artista;
 import entidades.Coordinador;
 import entidades.Credenciales;
 import entidades.Especialidad;
@@ -45,8 +42,11 @@ public class Principal {
 	static Scanner leer = new Scanner(System.in);
 	
 	static UsuariosService usuariosService= null;
+	static EspectaculosService espectaculosService = null;
+	static PropertiesService propertiesService = null;
 
-	static ArrayList<Espectaculo> espectaculos = null;
+	
+	
 	static Map<String, String> paises = null;
 
 
@@ -54,9 +54,11 @@ public class Principal {
 
 		// Comenzamos configurando el programa
 
-		cargarProperties();
+
+		propertiesService = new PropertiesService();
 		usuariosService = new UsuariosService();
-		espectaculos = cargarEspectaculos();
+		espectaculosService = new EspectaculosService();
+		
 		paises = cargarPaises();
 
 		System.out.println("**Bienvenido al Circo**");
@@ -66,7 +68,7 @@ public class Principal {
 		 * 1. ver espectaculos 2. Log IN 3. Salir
 		 */
 		int opcion = -1;
-		Boolean v = false;
+		Boolean valid = false;
 		do {
 			System.out.println("Menu Invitado");
 			System.out.println("Elige una opcion: \n\t1. Ver espectaculos\n\t2. " + "Log IN\n\t3. Salir");
@@ -76,17 +78,17 @@ public class Principal {
 
 					opcion = leer.nextInt();
 					leer.nextLine();
-					v = true;
+					valid = true;
 				} catch (Exception e) {
 					System.out.println("debes introducir un numero");
 					leer.nextLine();
 				}
-			} while (!v);
+			} while (!valid);
 
 			switch (opcion) {
 			case 1:
-				cargarEspectaculos();
-				mostrarEspectaculos();
+				espectaculosService.cargarEspectaculos();
+				espectaculosService.mostrarEspectaculos();
 				break;
 			case 2:
 				String usuario, password;
@@ -138,32 +140,7 @@ public class Principal {
 	 * METODOS:
 	 */
 
-	/**
-	 * Muestra el perfil de sesion activo.
-	 * 
-	 * @param actual
-	 */
-	public static void mostrarMenuSesion(Sesion actual) {
-		System.out.println("Menu " + actual.getPerfilActual() + ":");
-	}
 
-	private static void cargarProperties() {
-		Properties p = new Properties();
-		try (InputStream input = Principal.class.getClassLoader().getResourceAsStream("application.properties")) {
-			p.load(input);
-
-			ProgramProperties.usuarioAdmin = p.getProperty("usuarioAdmin");
-			ProgramProperties.passwordAdmin = p.getProperty("passwordAdmin");
-			ProgramProperties.credenciales = p.getProperty("credenciales");
-			ProgramProperties.espectaculos = p.getProperty("espectaculos");
-			ProgramProperties.paises = p.getProperty("paises");
-
-		} catch (FileNotFoundException e) {
-			System.out.println("No pude encontrar el fichero de properties");
-		} catch (IOException e) {
-			System.out.println("Hubo problemas al leer el fichero de properties");
-		}
-	}
 
 	private static Map<String, String> cargarPaises() {
 		Map<String, String> paises = new HashMap<String, String>();
@@ -221,14 +198,18 @@ public class Principal {
 		return valorNodo.getNodeValue(); // el nodo de TEXTO (valor real) NOMBRE
 	}
 
+	
+	
 	private static boolean comprobarEspectaculoRepetido(String espNombre) {
-		for (Espectaculo e : espectaculos) {
+		for (Espectaculo e : espectaculosService.getEspectaculos()) {
 			if (e.getNombre().equals(espNombre))
 				return true;
 		}
 		return false;
 	}
 
+	
+	
 	public static Espectaculo crearEspectaculo() {
 		String nombre = null, nombrePrueba = null;
 		Boolean fechas = false;
@@ -278,7 +259,7 @@ public class Principal {
 			numeros.add(numero1);
 			numeros.add(numero2);
 			numeros.add(numero3);
-			long id = espectaculos.size() + 1;
+			long id = espectaculosService.getEspectaculos().size() + 1;
 			Coordinador coordinadorActual = (Coordinador) usuariosService.getSesion().getUsuActual();
 			nuevoEspectaculo = new Espectaculo(id, nombre, fechaIni, fechaFin, numeros, coordinadorActual);
 			System.out.println("Espectaculo creado con exito.");
@@ -324,7 +305,7 @@ public class Principal {
 			numeros.add(numero1);
 			numeros.add(numero2);
 			numeros.add(numero3);
-			long idEspectaculo = espectaculos.size() + 1;
+			long idEspectaculo = espectaculosService.getEspectaculos().size() + 1;
 
 			System.out.println("Elige un coordinador de los siguientes escribiendo su numero:");
 			Boolean elegido = false;
@@ -371,58 +352,7 @@ public class Principal {
 		return nuevoEspectaculo;
 	}
 
-	private static ArrayList<Espectaculo> cargarEspectaculos() {
-		ArrayList<Espectaculo> espectaculos = new ArrayList<Espectaculo>();
-		File archivo = new File(ProgramProperties.espectaculos);
-		if (!archivo.exists()) {
-			try (ObjectOutputStream oos = new ObjectOutputStream(
-					new FileOutputStream(ProgramProperties.espectaculos, true))) {
-				oos.writeObject(espectaculos);
-				oos.close();
-			} catch (FileNotFoundException e) {
-				System.out.println("archivo no encontrado.");
-			} catch (IOException e) {
-				System.out.println("Error de escritura del archivo");
-			}
-		} else {
-			try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(ProgramProperties.espectaculos))) {
-
-				espectaculos = (ArrayList<Espectaculo>) ois.readObject();
-				ois.close();
-			} catch (FileNotFoundException e) {
-				System.out.println("archivo espectaculos no encontrado");
-			} catch (IOException e) {
-				System.out.println("error de lectura del archivo al cargar");
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				System.out.println("error de conversion de tipos.");
-			}
-
-		}
-
-		return espectaculos;
-	}
-
-	public static void guardarEspectaculo(Espectaculo aGuardar) {
-
-		ArrayList<Espectaculo> espectaculos = new ArrayList<Espectaculo>();
-		espectaculos = cargarEspectaculos();
-
-		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(ProgramProperties.espectaculos))) {
-			espectaculos.add(aGuardar);
-			oos.writeObject(espectaculos);
-			System.out.println("archivo modificado.");
-
-		} catch (FileNotFoundException e) {
-			System.out.println("no se pudo encontrar el archivo de espectaculos");
-		} catch (IOException e) {
-			System.out.println("error al escribir el archivo de espectaculos");
-			e.printStackTrace();
-		}
-	}
-
-
-
+	
 	private static ArrayList<String> leerFichero(String ruta) {
 		ArrayList<String> lineas = new ArrayList<>();
 		File archivo = new File(ruta);
@@ -477,10 +407,10 @@ public class Principal {
 			;
 			switch (opcion) {
 			case 1:
-				mostrarEspectaculos();
+				espectaculosService.mostrarEspectaculos();
 				break;
 			case 2:
-				guardarEspectaculo(crearEspectaculo());
+				espectaculosService.guardarEspectaculo(crearEspectaculo());
 				break;
 			case 3:
 				usuariosService.logOut();
@@ -524,7 +454,7 @@ public class Principal {
 
 				break;
 			case 2:
-				mostrarEspectaculos();
+				espectaculosService.mostrarEspectaculos();
 				break;
 			case 3:
 				usuariosService.logOut();
@@ -569,7 +499,7 @@ public class Principal {
 
 			switch (opcion) {
 			case 1:
-				mostrarEspectaculos();
+				espectaculosService.mostrarEspectaculos();
 
 				break;
 			case 2:
@@ -654,7 +584,7 @@ public class Principal {
 			switch (opcion2) {
 
 			case 1:
-				guardarEspectaculo(crearEspectaculo());
+				espectaculosService.guardarEspectaculo(crearEspectaculo());
 
 				break;
 			case 2:
@@ -868,27 +798,6 @@ public class Principal {
 
 
 
-	public static void mostrarEspectaculos() {
-		ArrayList<Espectaculo> listaEspectaculos = new ArrayList<>();
-		if (espectaculos == null || espectaculos.isEmpty()) {
-			System.out.println("No hay espectáculos disponibles.");
-			return;
-		}
-
-		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(ProgramProperties.espectaculos))) {
-			for (Espectaculo e : espectaculos) {
-				listaEspectaculos.add(e);
-			}
-		} catch (FileNotFoundException e1) {
-			System.out.println("Archivo de Espectaculos no encontrado");
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			System.out.println("Error de lectura o escritura del archivo Espectaculos");
-			e1.printStackTrace();
-		}
-		for (Espectaculo e : listaEspectaculos) {
-			System.out.println(e);
-		}
-	}
+	
 
 }

@@ -2,33 +2,25 @@ package controlador;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Map.Entry;
 
 import entidades.Artista;
 import entidades.Coordinador;
-import entidades.Credenciales;
-import entidades.Especialidad;
-import entidades.Perfil;
 import entidades.Persona;
 import entidades.ProgramProperties;
 import entidades.Sesion;
-import principal.Principal;
 
 public class UsuariosService {
 
 	Sesion actual = new Sesion();
 	
-	
+	/**
+	 * 
+	 * @return
+	 */
 	public Sesion getSesion() {
 		return actual;
 	}
@@ -51,10 +43,18 @@ public class UsuariosService {
 
 	ArrayList<Persona> credencialesSistema = null;
 
+	/*
+	 * constructor
+	 */
 	public UsuariosService() {
 		credencialesSistema = cargarCredenciales();
 	}
 
+	/**
+	 * 
+	 * @param ruta
+	 * @return
+	 */
 	private ArrayList<String> leerFichero(String ruta) {
 		ArrayList<String> lineas = new ArrayList<>();
 		File archivo = new File(ruta);
@@ -87,32 +87,15 @@ public class UsuariosService {
 		ArrayList<String> lineas = leerFichero(ProgramProperties.credenciales);
 
 		for (String linea : lineas) {
-			if (linea.contains("coordinacion")) {
+			if (linea.contains("COORDINACION")) {
 				personas.add(new Coordinador(linea));
-			} else if (linea.contains("artista")) {
+			} else if (linea.contains("ARTISTA")) {
 				personas.add(new Artista(linea));
 			}
 		}
 		return personas;
 	}
 
-	private void cargarProperties() {
-		Properties p = new Properties();
-		try (InputStream input = Principal.class.getClassLoader().getResourceAsStream("application.properties")) {
-			p.load(input);
-
-			ProgramProperties.usuarioAdmin = p.getProperty("usuarioAdmin");
-			ProgramProperties.passwordAdmin = p.getProperty("passwordAdmin");
-			ProgramProperties.credenciales = p.getProperty("credenciales");
-			ProgramProperties.espectaculos = p.getProperty("espectaculos");
-			ProgramProperties.paises = p.getProperty("paises");
-
-		} catch (FileNotFoundException e) {
-			System.out.println("No pude encontrar el fichero de properties");
-		} catch (IOException e) {
-			System.out.println("Hubo problemas al leer el fichero de properties");
-		}
-	}
 
 	public Persona login(String nombreUsuario, String password) {
 		Persona usuarioLogueado = null;

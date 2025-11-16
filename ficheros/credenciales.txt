@@ -1,1 +1,3 @@
 1|sunombre|contraseña|ajbd|sunombre|España|COORDINACION
+2|otro|pass|dnf|otronombre|España|ARTISTA
+3|tercero|password|fbsoirn|tercero|España|COORDINACION
