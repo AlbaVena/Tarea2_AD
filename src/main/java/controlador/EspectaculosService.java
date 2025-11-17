@@ -24,7 +24,7 @@ public class EspectaculosService {
 		return espectaculos;
 	}
 
-	private void setEspectaculos(ArrayList<Espectaculo> espectaculos) {
+	public void setEspectaculos(ArrayList<Espectaculo> espectaculos) {
 		this.espectaculos = espectaculos;
 	}
 	

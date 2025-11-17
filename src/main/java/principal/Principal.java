@@ -1,13 +1,10 @@
 package principal;
 
 import java.io.BufferedReader;
-
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -15,27 +12,28 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import controlador.EspectaculosService;
 import controlador.PropertiesService;
 import controlador.UsuariosService;
-import entidades.Persona;
 import entidades.Coordinador;
 import entidades.Credenciales;
 import entidades.Especialidad;
 import entidades.Espectaculo;
 import entidades.Numero;
 import entidades.Perfil;
+import entidades.Persona;
 import entidades.ProgramProperties;
-import entidades.Sesion;
 
 public class Principal {
 
@@ -353,7 +351,7 @@ public class Principal {
 	}
 
 	
-	private static ArrayList<String> leerFichero(String ruta) {
+	public static ArrayList<String> leerFichero(String ruta) {
 		ArrayList<String> lineas = new ArrayList<>();
 		File archivo = new File(ruta);
 		try {

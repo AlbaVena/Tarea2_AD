@@ -14,6 +14,7 @@ public class DAOFactoryJDBC {
 	
 	public Connection getConexion() {
 		return conexion;
+		
 	}
 
 	private static DAOFactoryJDBC f;
@@ -26,8 +27,13 @@ public class DAOFactoryJDBC {
 			m.setUrl(ProgramProperties.url);
 			m.setPassword(ProgramProperties.dbpass);
 			m.setUser(ProgramProperties.dbuser);
-			
+			 try {
 			conexion = m.getConnection();
+			 } catch (Exception e) {
+			        System.err.println("No se pudo crear la conexion. Detalles:");
+			        // Imprime el mensaje detallado del error de JDBC/MySQL
+			        e.printStackTrace(); 
+			    }
 			
 		} catch (Exception e) {
 			System.err.println("No se pudo crear la conexion");

@@ -82,7 +82,7 @@ public class UsuariosService {
 		return lineas;
 	}
 
-	private ArrayList<Persona> cargarCredenciales() {
+	 ArrayList<Persona> cargarCredenciales() {
 		ArrayList<Persona> personas = new ArrayList<>();
 		// leer el fichero de credenciales
 		ArrayList<String> lineas = leerFichero(ProgramProperties.credenciales);
