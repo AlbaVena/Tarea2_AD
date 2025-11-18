@@ -1,20 +1,25 @@
 package entidadesDAO;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLType;
+import java.sql.Types;
 
 import com.mysql.jdbc.Statement;
 
 import entidades.Artista;
+import entidades.Coordinador;
 import entidades.Persona;
 import factorias.DAOFactoryJDBC;
 
 public class PersonaDAO {
 
 	private DAOFactoryJDBC DAOF;
-	private final String INSERTARUSUARIOPS = "insert into personas (email, nombre, nacionalidad) values (?, ?, ?)";
-	private final String INSERTARARTISTAPS = "insert into artistas (apodo, id_persona) values (?, ?)";
+	private final String INSERTARUSUARIOPS = "INSERT into personas (email, nombre, nacionalidad) VALUES (?, ?, ?)";
+	private final String INSERTARARTISTAPS = "INSERT into artistas (apodo, id_persona) VALUES (?, ?)";
+	private final String INSERTARCOORDINADORPS = "INSERT into coordinadores (senior, fechasenior, id_persona) VALUES (?, ?, ?)";
 
 	public PersonaDAO() {
 		DAOF = DAOFactoryJDBC.getDAOFactory();
@@ -77,9 +82,14 @@ public class PersonaDAO {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		long resultado = -1;
+		
 		long idPersonaGenerado = insertarUsuario(artista);
 
 		if (idPersonaGenerado <= 0) {
+			
+			
+			
+			
 			System.err.println("Fallo al obtener el id_persona");
 			return -1;
 		}
@@ -90,6 +100,76 @@ public class PersonaDAO {
 
 			ps.setString(1, artista.getApodo());
 			ps.setLong(2, idPersonaGenerado);
+
+			int filas = ps.executeUpdate();
+
+			if (filas == 0) {
+				throw new SQLException("No se inserto nada");
+			}
+			
+			
+			rs = ps.getGeneratedKeys();
+
+			if (rs.next()) {
+				resultado = rs.getLong(1);
+				
+				//TODO aqui tengo que insertar las especialidades
+				//insertarEspecialidades(idArtistaGenerado, artista.getEspecialidades());
+				
+			}
+		else {
+			throw new SQLException("No se pudo obtener el ID");
+		}
+			
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					System.err.println("Error al cerrar la consulta");
+				}
+			}
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					System.err.println("Error al cerrar la conexion");
+				}
+			}
+		}
+
+		return resultado;
+	}
+	
+	
+	
+	public long insertarCoordinador(Coordinador coordinador) {
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		long resultado = -1;
+		long idPersonaGenerado = insertarUsuario(coordinador);
+
+		if (idPersonaGenerado <= 0) {
+			
+			System.err.println("Fallo al obtener el id_persona");
+			return -1;
+		}
+
+		try {
+			ps = DAOF.getConexion().prepareStatement(INSERTARCOORDINADORPS,
+					Statement.RETURN_GENERATED_KEYS);
+
+			ps.setBoolean(1, coordinador.isSenior());
+			
+			Date sqlDate = Date.valueOf(coordinador.getFechasenior());
+			
+			ps.setDate(2, sqlDate);
+			ps.setLong(3, idPersonaGenerado);
 
 			int filas = ps.executeUpdate();
 
