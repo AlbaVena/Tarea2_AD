@@ -144,7 +144,9 @@ public class UsuariosService {
 		
 		if (nueva instanceof Artista) {
 			Artista artista = (Artista) nueva;
-			System.out.println(pdao.insertarArtista(artista));
+			System.out.println(pdao.insertarArtista(artista));  //  FUNCIONA
+																// TODO lo mismo para coordinador, 
+																// y luego para credenciales
 		}
 		
 
