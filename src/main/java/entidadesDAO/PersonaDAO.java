@@ -29,10 +29,12 @@ public class PersonaDAO {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		long resultado = -1;
+
+		// desactivar el autocommit
+
 		try {
 			// ***** Obtener la conexion ( y de paso los ID)****
-			ps = DAOF.getConexion().prepareStatement(INSERTARUSUARIOPS,
-					Statement.RETURN_GENERATED_KEYS);
+			ps = DAOF.getConexion().prepareStatement(INSERTARUSUARIOPS, Statement.RETURN_GENERATED_KEYS);
 
 			// añadir los campos en el mismo orden
 			ps.setString(1, persona.getEmail());
@@ -79,24 +81,28 @@ public class PersonaDAO {
 	}
 
 	public long insertarArtista(Artista artista) {
+
+		try {
+			DAOF.getConexion().setAutoCommit(false);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		long resultado = -1;
-		
+
 		long idPersonaGenerado = insertarUsuario(artista);
 
 		if (idPersonaGenerado <= 0) {
-			
-			
-			
-			
+
 			System.err.println("Fallo al obtener el id_persona");
 			return -1;
 		}
 
 		try {
-			ps = DAOF.getConexion().prepareStatement(INSERTARARTISTAPS,
-					Statement.RETURN_GENERATED_KEYS);
+			ps = DAOF.getConexion().prepareStatement(INSERTARARTISTAPS, Statement.RETURN_GENERATED_KEYS);
 
 			ps.setString(1, artista.getApodo());
 			ps.setLong(2, idPersonaGenerado);
@@ -106,27 +112,23 @@ public class PersonaDAO {
 			if (filas == 0) {
 				throw new SQLException("No se inserto nada");
 			}
-			
-			
+
 			rs = ps.getGeneratedKeys();
 
 			if (rs.next()) {
 				resultado = rs.getLong(1);
-				
-				//TODO aqui tengo que insertar las especialidades
-				//insertarEspecialidades(idArtistaGenerado, artista.getEspecialidades());
-				
+				DAOF.getConexion().commit();
+				// TODO aqui tengo que insertar las especialidades
+				// insertarEspecialidades(idArtistaGenerado, artista.getEspecialidades());
+
+			} else {
+				throw new SQLException("No se pudo obtener el ID");
 			}
-		else {
-			throw new SQLException("No se pudo obtener el ID");
-		}
-			
 
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			if (rs != null) {
 				try {
 					rs.close();
@@ -145,9 +147,7 @@ public class PersonaDAO {
 
 		return resultado;
 	}
-	
-	
-	
+
 	public long insertarCoordinador(Coordinador coordinador) {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -155,19 +155,18 @@ public class PersonaDAO {
 		long idPersonaGenerado = insertarUsuario(coordinador);
 
 		if (idPersonaGenerado <= 0) {
-			
+
 			System.err.println("Fallo al obtener el id_persona");
 			return -1;
 		}
 
 		try {
-			ps = DAOF.getConexion().prepareStatement(INSERTARCOORDINADORPS,
-					Statement.RETURN_GENERATED_KEYS);
+			ps = DAOF.getConexion().prepareStatement(INSERTARCOORDINADORPS, Statement.RETURN_GENERATED_KEYS);
 
 			ps.setBoolean(1, coordinador.isSenior());
-			
+
 			Date sqlDate = Date.valueOf(coordinador.getFechasenior());
-			
+
 			ps.setDate(2, sqlDate);
 			ps.setLong(3, idPersonaGenerado);
 
@@ -176,27 +175,23 @@ public class PersonaDAO {
 			if (filas == 0) {
 				throw new SQLException("No se inserto nada");
 			}
-			
-			
+
 			rs = ps.getGeneratedKeys();
 
 			if (rs.next()) {
 				resultado = rs.getLong(1);
-				
-				//TODO aqui tengo que insertar las especialidades
-				//insertarEspecialidades(idArtistaGenerado, artista.getEspecialidades());
-				
+
+				// TODO aqui tengo que insertar las especialidades
+				// insertarEspecialidades(idArtistaGenerado, artista.getEspecialidades());
+
+			} else {
+				throw new SQLException("No se pudo obtener el ID");
 			}
-		else {
-			throw new SQLException("No se pudo obtener el ID");
-		}
-			
 
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			if (rs != null) {
 				try {
 					rs.close();
