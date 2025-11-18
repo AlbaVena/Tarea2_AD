@@ -131,9 +131,23 @@ public class UsuariosService {
 		nueva.setId(credencialesSistema.size() + 1);
 		credencialesSistema.add(nueva);
 		//persistirCredenciales();
+		
+		/**
+		 * comprobacion de metodos:
+		 * 
+		 * 
+		 */
+		
 		PersonaDAO pdao = new PersonaDAO();
 		//pdao.insertarUsuario(nueva);
-		System.out.println(pdao.insertarUsuario(nueva));
+		//System.out.println(pdao.insertarUsuario(nueva));   FUNCIONA
+		
+		if (nueva instanceof Artista) {
+			Artista artista = (Artista) nueva;
+			System.out.println(pdao.insertarArtista(artista));
+		}
+		
+
 	}
 
 	public void persistirCredenciales() {

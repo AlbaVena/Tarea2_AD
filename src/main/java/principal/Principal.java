@@ -26,6 +26,7 @@ import org.w3c.dom.NodeList;
 import controlador.EspectaculosService;
 import controlador.PropertiesService;
 import controlador.UsuariosService;
+import entidades.Artista;
 import entidades.Coordinador;
 import entidades.Credenciales;
 import entidades.Especialidad;
@@ -788,7 +789,15 @@ public class Principal {
 		
 		
 		Credenciales credenciales = new Credenciales(nombreUsuario, passUsuario, perfilUsu);
-		return resultadoLogin = new Persona(-1, email, nombreUsuario, nacionalidad, credenciales, perfilUsu);
+		
+		if (perfilUsu == Perfil.ARTISTA) {
+			resultadoLogin = new Artista(-1, email, nombre, nacionalidad, credenciales, -1, apodo, especialidadesUsu, null);
+		}
+		else if (perfilUsu == Perfil.COORDINACION) {
+			resultadoLogin = new Coordinador(-1, email, nombre, nacionalidad, credenciales, -1, senior, fecha, null);
+		}
+		
+		return resultadoLogin;
 	}
 	
 	
