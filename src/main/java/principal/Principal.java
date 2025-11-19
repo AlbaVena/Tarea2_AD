@@ -35,14 +35,19 @@ import entidades.Numero;
 import entidades.Perfil;
 import entidades.Persona;
 import entidades.ProgramProperties;
+import entidadesDAO.PersonaDAO;
 
 public class Principal {
 
 	static Scanner leer = new Scanner(System.in);
 	
+	//TODO eliminar usuariosservice
 	static UsuariosService usuariosService= null;
 	static EspectaculosService espectaculosService = null;
 	static PropertiesService propertiesService = null;
+	
+	
+	static PersonaDAO PDAO = null;
 
 	
 	
@@ -56,9 +61,10 @@ public class Principal {
 
 		propertiesService = new PropertiesService();
 		usuariosService = new UsuariosService();
-		espectaculosService = new EspectaculosService();
-		
+		espectaculosService = new EspectaculosService();		
 		paises = cargarPaises();
+		
+		PDAO = new PersonaDAO();
 
 		System.out.println("**Bienvenido al Circo**");
 
@@ -350,36 +356,10 @@ public class Principal {
 
 		return nuevoEspectaculo;
 	}
-
 	
-	public static ArrayList<String> leerFichero(String ruta) {
-		ArrayList<String> lineas = new ArrayList<>();
-		File archivo = new File(ruta);
-		try {
-
-			if (!archivo.exists()) {
-				FileWriter writer = new FileWriter(archivo);
-				writer.write("");
-				writer.close();
-			} else {
-
-				BufferedReader reader = new BufferedReader(new FileReader(ruta));
-				String linea;
-				while ((linea = reader.readLine()) != null) {
-					lineas.add(linea);
-				}
-				reader.close();
-
-			}
-		} catch (IOException e) {
-			System.out.println("No se ha podido cargar el fichero: " + ruta);
-		}
-
-		return lineas;
-	}
-
-
-	// MENUS
+	
+	
+	
 	// MENU COORDINACION
 	/**
 	 * 1. ver espectaculos 2. gestionar espectaculos 2.1 crear-modificar espectaculo
@@ -521,6 +501,11 @@ public class Principal {
 		} while (opcion < 4);
 	}
 
+	
+	/**
+	 * MENU gestion personas
+	 */
+	
 	public static void gestionarPersonas() {
 		int opcion2 = -1;
 		do {
@@ -546,7 +531,7 @@ public class Principal {
 				break;
 			case 2:
 
-				
+				modificarPersona();
 				
 				
 				break;
@@ -599,6 +584,17 @@ public class Principal {
 		} while (opcion2 != 4);
 	}
 
+	
+	//ESTE METODO QUEDA EN VISTA PORQUE ESTA COMPUESTO POR system.out.println PRINCIPALMENTE
+	/**
+	 * pide todos los datos que componen una persona separados por
+	 * categorias
+	 * 1.datos personales
+	 * 2.datos profesionales
+	 * 3.datos de credenciales
+	 * 
+	 * @return Persona completa
+	 */
 	// registrar persona nueva
 	public static Persona registrarPersona() {
 		Persona resultadoLogin = null;
@@ -619,7 +615,7 @@ public class Principal {
 			System.out.println("Ese email ya esta registrado");
 			return null;
 		}
-		System.out.println("introduce el nombre de la persona");
+		System.out.println("introduce el nombre completo de la persona");
 		nombre = leer.nextLine();
 
 		boolean nac = false;
@@ -798,6 +794,75 @@ public class Principal {
 		}
 		
 		return resultadoLogin;
+	}
+	
+	public static String modificarPersona() {
+		
+		String resultado = "No se ha modificado ningun dato.";
+		int opcion = -1, cambio = -1;;
+		String nuevoNombre, nuevoEmail, nuevaNac;
+		
+		for (Persona p : usuariosService.getCredencialesSistema()) {
+			System.out.println("ID: "+p.getId()+" - "+p.getNombre()+", "+p.getPerfil());
+		}
+		
+		System.out.println("Indica que usuario se va a modificar (escribe su id)");
+		opcion = leer.nextInt();
+		leer.nextLine();
+		
+		for (Persona p : PDAO.getPersonas()) {
+			if (p.getId() == opcion) {
+				System.out.println("¿Que quieres cambiar? \n\t1. nombre\\n\\t2. email\\n\\t3. nacionalidad");
+				cambio = leer.nextInt();
+				leer.nextLine();
+				
+				switch (cambio) {
+				case 1:
+					System.out.println("Introduce el nuevo nombre completo");
+					nuevoNombre = leer.nextLine();
+					p.setNombre(resultado);
+					resultado = "Se ha modificado el nombre de ID "+p.getId();
+					break;
+				case 2:
+					System.out.println("Introduce el nuevo email)");
+					nuevoEmail = leer.nextLine();
+					if (!usuariosService.comprobarEmail(nuevoEmail)) {
+						System.out.println("Ese email ya esta registrado");
+						break;
+					}
+					else {
+						p.setEmail(nuevoEmail);
+						resultado = "Se ha modificado el email de ID "+p.getId();
+					}
+					break;
+				case 3:
+					boolean nac = false;
+					do {
+						System.out.println("introduce el id del pais al que cambia");
+						for (Entry<String, String> entrada : paises.entrySet()) {
+							System.out.println(entrada);
+						}
+						nuevaNac = leer.nextLine().toUpperCase();
+						if (paises.containsKey(nuevaNac)) {
+							nuevaNac = paises.get(nuevaNac);
+							nac = true;
+							p.setNacionalidad(nuevaNac);
+						} else {
+							System.out.println("Ese pais no se encuentra");
+						}
+					}
+					while (!nac);
+					resultado = "Se ha modificado la nacionalidad de ID "+p.getId();
+					break;
+					default: System.out.println("Esa no fue una opcion valida");
+				}
+				
+			}
+		}
+		
+		
+		return resultado;
+		
 	}
 	
 	

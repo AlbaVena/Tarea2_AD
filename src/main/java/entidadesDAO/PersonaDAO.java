@@ -6,19 +6,22 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLType;
 import java.sql.Types;
+import java.time.LocalDate;
+import java.util.ArrayList;
 
 import com.mysql.jdbc.Statement;
 
 import entidades.Artista;
 import entidades.Coordinador;
 import entidades.Credenciales;
+import entidades.Perfil;
 import entidades.Persona;
 import factorias.DAOFactoryJDBC;
 
 public class PersonaDAO {
 
 	private DAOFactoryJDBC DAOF; // CONEXION
-	
+
 	/**
 	 * INSERTAR
 	 */
@@ -26,18 +29,28 @@ public class PersonaDAO {
 	private final String INSERTARARTISTAPS = "INSERT into artistas (apodo, id_persona) VALUES (?, ?)";
 	private final String INSERTARCOORDINADORPS = "INSERT into coordinadores (senior, fechasenior, id_persona) VALUES (?, ?, ?)";
 	private final String INSERTARCREDENCIALESPS = "INSERT into credenciales (nombre, password, id_persona) VALUES (?, ?, ?)";
-	
+
+	/**
+	 * SELECT
+	 */
+	private final String SELECTPERSONASsql = "SELECT "
+			+ " p.id_persona, p.nombre AS nombre_persona, p.email, p.nacionalidad, "
+			+ " c.nombre AS nombre_usuario, c.password, c.perfil, " + " a.id_artista, a.apodo, "
+			+ " co.id_coordinador, co.senior, co.fechasenior " + "FROM personas p "
+			+ "LEFT JOIN credenciales c ON p.id_persona = c.id_persona "
+			+ "LEFT JOIN artistas a ON p.id_persona = a.id_persona "
+			+ "LEFT JOIN coordinadores co ON p.id_persona = co.id_persona";
+
 	/**
 	 * MODIFICAR
 	 */
 	private final String MODIFICARARTISTAPS = "";
 	private final String MODIFICARCOORDINADORPS = "";
-	
+
 	/**
 	 * ELIMINAR
 	 */
 	private final String ELIMINARUSUARIO = "";
-	
 
 	public PersonaDAO() {
 		DAOF = DAOFactoryJDBC.getDAOFactory();
@@ -219,7 +232,7 @@ public class PersonaDAO {
 			if (rs.next()) {
 				resultado = rs.getLong(1);
 				insertarCredenciales(coordinador.getCredenciales(), idPersonaGenerado);
-				
+
 				DAOF.getConexion().commit();
 
 				// TODO aqui tengo que insertar las especialidades
@@ -291,7 +304,7 @@ public class PersonaDAO {
 
 			if (rs.next()) {
 				resultado = rs.getLong(1);
-				
+
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -322,6 +335,77 @@ public class PersonaDAO {
 
 	public void modificarCoordinador() {
 		// TODO
+	}
+
+	public ArrayList<Persona> getPersonas() {
+		ArrayList<Persona> personas = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try {
+			ps = DAOF.getConexion().prepareStatement(SELECTPERSONASsql);
+			rs = ps.executeQuery();
+
+			while (rs.next()) {
+				// de persona
+				long idPersona = rs.getLong("id_persona");
+				String email = rs.getString("email");
+				String nombre = rs.getString("nombre_persona");
+				String nacionalidad = rs.getString("nacionalidad");
+
+				// de credenciales
+				Credenciales credenciales = new Credenciales(rs.getString("nombre_usuario"), rs.getString("password"),
+						Perfil.valueOf(rs.getString("perfil")));
+
+				if (credenciales.getPerfil() == Perfil.ARTISTA) {
+					long idArtista = rs.getLong("id_artista");
+					String apodo = rs.getString("apodo");
+
+					Artista nuevoArtista = new Artista(idPersona, email, nombre, nacionalidad, credenciales, idArtista,
+							apodo, null, null);
+					personas.add(nuevoArtista);
+
+				}
+
+				else if (credenciales.getPerfil() == Perfil.COORDINACION) {
+					long idCoordinador = rs.getLong("id_coordinador");
+					boolean senior = rs.getBoolean("senior");
+					java.sql.Date fecha = rs.getDate("fechasenior");
+					LocalDate fechaLocal = null;
+
+					if (fecha != null) {
+						fechaLocal = fecha.toLocalDate();
+					}
+
+					Coordinador nuevoCoordinador = new Coordinador(idPersona, email, nombre, nacionalidad, credenciales,
+							idCoordinador, senior, fechaLocal, null);
+
+					personas.add(nuevoCoordinador);
+				}
+
+			}
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					System.err.println("Error al cerrar la consulta");
+				}
+			}
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					System.err.println("Error al cerrar la conexion");
+				}
+			}
+		}
+
+		return personas;
 	}
 
 }
