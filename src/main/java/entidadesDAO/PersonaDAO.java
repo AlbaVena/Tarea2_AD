@@ -4,8 +4,6 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLType;
-import java.sql.Types;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -25,10 +23,10 @@ public class PersonaDAO {
 	/**
 	 * INSERTAR
 	 */
-	private final String INSERTARUSUARIOPS = "INSERT into personas (email, nombre, nacionalidad) VALUES (?, ?, ?)";
-	private final String INSERTARARTISTAPS = "INSERT into artistas (apodo, id_persona) VALUES (?, ?)";
-	private final String INSERTARCOORDINADORPS = "INSERT into coordinadores (senior, fechasenior, id_persona) VALUES (?, ?, ?)";
-	private final String INSERTARCREDENCIALESPS = "INSERT into credenciales (nombre, password, id_persona) VALUES (?, ?, ?)";
+	private final String INSERTARUSUARIOPS = "INSERT INTO personas (email, nombre, nacionalidad) VALUES (?, ?, ?)";
+	private final String INSERTARARTISTAPS = "INSERT INTO artistas (apodo, id_persona) VALUES (?, ?)";
+	private final String INSERTARCOORDINADORPS = "INSERT INTO coordinadores (senior, fechasenior, id_persona) VALUES (?, ?, ?)";
+	private final String INSERTARCREDENCIALESPS = "INSERT INTO credenciales (nombre, password, id_persona) VALUES (?, ?, ?)";
 
 	/**
 	 * SELECT
@@ -52,6 +50,10 @@ public class PersonaDAO {
 	 */
 	private final String ELIMINARUSUARIO = "";
 
+	
+	/**
+	 * CONSTRUCTOR
+	 */
 	public PersonaDAO() {
 		DAOF = DAOFactoryJDBC.getDAOFactory();
 	}

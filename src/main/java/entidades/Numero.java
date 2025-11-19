@@ -11,11 +11,11 @@ public class Numero implements Serializable{
 	private long id;
 	private int orden;
 	private String nombre;
-	private double duracion;
+	private int duracion;
 	private Espectaculo espectaculo;
 	private Set <Artista> artistas;
 	
-	public Numero(long id, int orden, String nombre, double duracion, Espectaculo espectaculo, Set<Artista> artistas) {
+	public Numero(long id, int orden, String nombre, int duracion, Espectaculo espectaculo, Set<Artista> artistas) {
 		this.id = id;
 		this.orden = orden;
 		this.nombre = nombre;
@@ -24,7 +24,7 @@ public class Numero implements Serializable{
 		this.artistas = artistas;
 	}
 
-	public Numero (String nombre, double duracion) {
+	public Numero (String nombre, int duracion) {
 		this.nombre = nombre;
 		this.duracion = duracion;
 	}
@@ -52,11 +52,11 @@ public class Numero implements Serializable{
 		this.nombre = nombre;
 	}
 
-	public double getDuracion() {
+	public int getDuracion() {
 		return duracion;
 	}
 
-	public void setDuracion(double duracion) {
+	public void setDuracion(int duracion) {
 		this.duracion = duracion;
 	}
 
