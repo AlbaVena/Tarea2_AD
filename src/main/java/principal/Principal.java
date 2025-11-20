@@ -71,7 +71,9 @@ public class Principal {
 		Boolean valid = false;
 		do {
 			System.out.println("Menu Invitado");
-			System.out.println("Elige una opcion: \n\t1. Ver espectaculos\n\t2. " + "Log IN\n\t3. Salir");
+			System.out
+					.println("Elige una opcion: \n\t1. Ver espectaculos\n\t2. "
+							+ "Log IN\n\t3. Salir");
 
 			do {
 				try {
@@ -104,7 +106,8 @@ public class Principal {
 					password = leer.nextLine();
 				} while (password == null);
 
-				Persona usuarioIntento = usuariosService.login(usuario, password);
+				Persona usuarioIntento = usuariosService.login(usuario,
+						password);
 
 				if (usuarioIntento != null) {
 					switch (usuarioIntento.getPerfil()) {
@@ -129,7 +132,8 @@ public class Principal {
 				System.out.println("Cerrando el programa...");
 				break;
 			default:
-				System.out.println("No has introducido una opcion valida." + " Por favor intentalo de nuevo.");
+				System.out.println("No has introducido una opcion valida."
+						+ " Por favor intentalo de nuevo.");
 
 			}
 		} while (opcion != 3);
@@ -144,7 +148,8 @@ public class Principal {
 		Map<String, String> paises = new HashMap<String, String>();
 
 		try {
-			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			DocumentBuilder builder = DocumentBuilderFactory.newInstance()
+					.newDocumentBuilder();
 			Document documento = builder.parse(ProgramProperties.paises);
 			documento.getDocumentElement().normalize();
 
@@ -181,7 +186,8 @@ public class Principal {
 		}
 
 		catch (Exception e) {
-			System.out.println("Ha ocurrido algun problema al leer el archivo XML.");
+			System.out.println(
+					"Ha ocurrido algun problema al leer el archivo XML.");
 		}
 
 		return paises;
@@ -189,8 +195,9 @@ public class Principal {
 
 	private static String getNodo(String etiqueta, Element elem) { // "etiqueta"
 																	// concreta
-		NodeList nodo = elem.getElementsByTagName(etiqueta).item(0).getChildNodes(); // busca todas las qtiquetas hijas
-																						// con el nombre de la etiqueta
+		NodeList nodo = elem.getElementsByTagName(etiqueta).item(0)
+				.getChildNodes(); // busca todas las qtiquetas hijas
+									// con el nombre de la etiqueta
 		// devuelve los nodos hijos
 		Node valorNodo = nodo.item(0); // primer hijo ID
 		return valorNodo.getNodeValue(); // el nodo de TEXTO (valor real) NOMBRE
@@ -212,20 +219,25 @@ public class Principal {
 		long numCoor = -1;
 		Espectaculo nuevoEspectaculo;
 
-		if (usuariosService.getSesion().getPerfilActual() == Perfil.COORDINACION) {
+		if (usuariosService.getSesion()
+				.getPerfilActual() == Perfil.COORDINACION) {
 			do {
-				System.out.println("introduce el nombre del espectaculo" + "\n(debe tener un maximo de 25 caracteres)");
+				System.out.println("introduce el nombre del espectaculo"
+						+ "\n(debe tener un maximo de 25 caracteres)");
 				nombrePrueba = leer.nextLine();
-				if (nombrePrueba.length() <= 25 && !comprobarEspectaculoRepetido(nombrePrueba)) {
+				if (nombrePrueba.length() <= 25
+						&& !comprobarEspectaculoRepetido(nombrePrueba)) {
 					nombre = nombrePrueba;
 				} else {
-					System.out.println("ese nombre es demasiado largo o ya existe.");
+					System.out.println(
+							"ese nombre es demasiado largo o ya existe.");
 					nombre = null;
 				}
 			} while (nombre == null);
 			try {
 				do {
-					System.out.println("introduce la fecha de inicio (formato yyyy-mm-dd)");
+					System.out.println(
+							"introduce la fecha de inicio (formato yyyy-mm-dd)");
 					String fecha1 = leer.nextLine();
 					fechaIni = LocalDate.parse(fecha1);
 
@@ -235,17 +247,20 @@ public class Principal {
 					fechaFin = LocalDate.parse(fecha2);
 
 					if (fechaFin.isBefore(fechaIni)) {
-						System.out.println("La fecha final no puede ser anterior a la inicial.");
+						System.out.println(
+								"La fecha final no puede ser anterior a la inicial.");
 						fechas = false;
 					} else if (fechaFin.isAfter(fechaIni.plusYears(1))) {
-						System.out.println("El periodo no puede ser superior a 1 año.");
+						System.out.println(
+								"El periodo no puede ser superior a 1 año.");
 						fechas = false;
 					} else {
 						fechas = true;
 					}
 				} while (fechas == false);
 			} catch (DateTimeParseException e) {
-				System.out.println("fFormato de fecha incorrecto. Usa yyyy-mm-dd.");
+				System.out.println(
+						"fFormato de fecha incorrecto. Usa yyyy-mm-dd.");
 			}
 			Numero numero1 = new Numero("noche magica", 15);
 			Numero numero2 = new Numero("sonidos del aire", 12);
@@ -254,23 +269,29 @@ public class Principal {
 			numeros.add(numero2);
 			numeros.add(numero3);
 			long id = espectaculosService.getEspectaculos().size() + 1;
-			Coordinador coordinadorActual = (Coordinador) usuariosService.getSesion().getUsuActual();
-			nuevoEspectaculo = new Espectaculo(id, nombre, fechaIni, fechaFin, numeros, coordinadorActual);
+			Coordinador coordinadorActual = (Coordinador) usuariosService
+					.getSesion().getUsuActual();
+			nuevoEspectaculo = new Espectaculo(id, nombre, fechaIni, fechaFin,
+					numeros, coordinadorActual);
 			System.out.println("Espectaculo creado con exito.");
 		} else {
 			do {
-				System.out.println("introduce el nombre del espectaculo" + "\n(debe tener un maximo de 25 caracteres)");
+				System.out.println("introduce el nombre del espectaculo"
+						+ "\n(debe tener un maximo de 25 caracteres)");
 				nombrePrueba = leer.nextLine();
-				if (nombrePrueba.length() <= 25 && !comprobarEspectaculoRepetido(nombrePrueba)) {
+				if (nombrePrueba.length() <= 25
+						&& !comprobarEspectaculoRepetido(nombrePrueba)) {
 					nombre = nombrePrueba;
 				} else {
-					System.out.println("ese nombre es demasiado largo o ya existe.");
+					System.out.println(
+							"ese nombre es demasiado largo o ya existe.");
 					nombre = null;
 				}
 			} while (nombre == null);
 			do {
 				try {
-					System.out.println("introduce la fecha de inicio (formato yyyy-mm-dd)");
+					System.out.println(
+							"introduce la fecha de inicio (formato yyyy-mm-dd)");
 					String fecha1 = leer.nextLine();
 					fechaIni = LocalDate.parse(fecha1);
 
@@ -280,16 +301,19 @@ public class Principal {
 					fechaFin = LocalDate.parse(fecha2);
 
 					if (fechaFin.isBefore(fechaIni)) {
-						System.out.println("La fecha final no puede ser anterior a la inicial.");
+						System.out.println(
+								"La fecha final no puede ser anterior a la inicial.");
 						fechas = false;
 					} else if (fechaFin.isAfter(fechaIni.plusYears(1))) {
-						System.out.println("El periodo no puede ser superior a 1 año.");
+						System.out.println(
+								"El periodo no puede ser superior a 1 año.");
 						fechas = false;
 					} else {
 						fechas = true;
 					}
 				} catch (DateTimeParseException e) {
-					System.out.println("Formato de fecha incorrecto. Usa yyyy-mm-dd.");
+					System.out.println(
+							"Formato de fecha incorrecto. Usa yyyy-mm-dd.");
 				}
 			} while (fechas == false);
 
@@ -299,9 +323,11 @@ public class Principal {
 			numeros.add(numero1);
 			numeros.add(numero2);
 			numeros.add(numero3);
-			long idEspectaculo = espectaculosService.getEspectaculos().size() + 1;
+			long idEspectaculo = espectaculosService.getEspectaculos().size()
+					+ 1;
 
-			System.out.println("Elige un coordinador de los siguientes escribiendo su numero:");
+			System.out.println(
+					"Elige un coordinador de los siguientes escribiendo su numero:");
 			Boolean elegido = false;
 			Coordinador coordinadorElegido = null;
 			Boolean coordinadorEncontrado = false;
@@ -324,9 +350,11 @@ public class Principal {
 				} while (!v);
 
 				for (Persona c : usuariosService.getCredencialesSistema()) {
-					if (c.getPerfil() == Perfil.COORDINACION && c.getId() == numCoor) {
+					if (c.getPerfil() == Perfil.COORDINACION
+							&& c.getId() == numCoor) {
 						if (c instanceof Coordinador) {
-							coordinadorElegido = new Coordinador(c.getId(), c.getEmail(), nombre, c.getNacionalidad(),
+							coordinadorElegido = new Coordinador(c.getId(),
+									c.getEmail(), nombre, c.getNacionalidad(),
 									c.getCredenciales());
 							coordinadorEncontrado = true;
 							elegido = true;
@@ -340,7 +368,8 @@ public class Principal {
 				}
 				System.out.println("Espectaculo creado.");
 			} while (!elegido);
-			nuevoEspectaculo = new Espectaculo(idEspectaculo, nombre, fechaIni, fechaFin, numeros, coordinadorElegido);
+			nuevoEspectaculo = new Espectaculo(idEspectaculo, nombre, fechaIni,
+					fechaFin, numeros, coordinadorElegido);
 		}
 
 		return nuevoEspectaculo;
@@ -348,16 +377,17 @@ public class Principal {
 
 	// MENU COORDINACION
 	/**
-	 * 1. ver espectaculos 2. gestionar espectaculos 2.1 crear-modificar espectaculo
-	 * 2.2 crear-modificar numero 2.3 asignar artistas 3. Log OUT
+	 * 1. ver espectaculos 2. gestionar espectaculos 2.1 crear-modificar
+	 * espectaculo 2.2 crear-modificar numero 2.3 asignar artistas 3. Log OUT
 	 */
 	public static void menuCoordinacion() {
 		int opcion = -1;
 
 		System.out.println("Menu Coordinacion");
 		do {
-			System.out.println("Menu COORDINACION\nElige una opcion: \n\t1. Ver espectaculos\n\t.2 "
-					+ "Crear o Modificar espectaculos\n\t3. Log OUT\n\t4. Salir al meu anterior");
+			System.out.println(
+					"Menu COORDINACION\nElige una opcion: \n\t1. Ver espectaculos\n\t.2 "
+							+ "Crear o Modificar espectaculos\n\t3. Log OUT\n\t4. Salir al meu anterior");
 			Boolean v = false;
 			do {
 				try {
@@ -385,7 +415,8 @@ public class Principal {
 				System.out.println("Saliendo al menu anterior...");
 				break;
 			default:
-				System.out.println("No has introducido una opcion valida." + " Por favor intentalo de nuevo.");
+				System.out.println("No has introducido una opcion valida."
+						+ " Por favor intentalo de nuevo.");
 			}
 
 		} while (opcion != 4);
@@ -400,7 +431,9 @@ public class Principal {
 
 		System.out.println("Menu Artista");
 		do {
-			System.out.println("Elige una opcion: \n\t1. Ver tu ficha\n\t2. Ver " + "espectaculos\n\t3. Log OUT");
+			System.out
+					.println("Elige una opcion: \n\t1. Ver tu ficha\n\t2. Ver "
+							+ "espectaculos\n\t3. Log OUT");
 			Boolean v = false;
 			do {
 				try {
@@ -426,7 +459,8 @@ public class Principal {
 
 				break;
 			default:
-				System.out.println("No has introducido una opcion valida." + " Por favor intentalo de nuevo.");
+				System.out.println("No has introducido una opcion valida."
+						+ " Por favor intentalo de nuevo.");
 			}
 
 		} while (opcion != 3);
@@ -434,18 +468,20 @@ public class Principal {
 
 	// MENU ADMIN
 	/**
-	 * 1. ver espectaculos 2. gestionar espectaculos 2.1 crear-modificar espectaculo
-	 * 2.2 crear-modificar numero 2.3 asignar artistas 3. gestionar personas y
-	 * credenciales 3.1 registrar persona 3.2 asignar perfil y credenciales 3.3
-	 * gestionar datos artista-coordinador 4. Log OUT
+	 * 1. ver espectaculos 2. gestionar espectaculos 2.1 crear-modificar
+	 * espectaculo 2.2 crear-modificar numero 2.3 asignar artistas 3. gestionar
+	 * personas y credenciales 3.1 registrar persona 3.2 asignar perfil y
+	 * credenciales 3.3 gestionar datos artista-coordinador 4. Log OUT
 	 */
 	public static void menuAdmin() {
 		int opcion = -1;
 
 		System.out.println("Menu Administrador");
 		do {
-			System.out.println("Elige una opcion: \n\t1. Ver espectaculos" + "\n\t2. Gestionar espectaculos"
-					+ "\n\t3. Gestionar personas y credenciales" + "\n\t4. Log OUT" + "\n\t5. Salir al menu anterior");
+			System.out.println("Elige una opcion: \n\t1. Ver espectaculos"
+					+ "\n\t2. Gestionar espectaculos"
+					+ "\n\t3. Gestionar personas y credenciales"
+					+ "\n\t4. Log OUT" + "\n\t5. Salir al menu anterior");
 
 			Boolean validado = false;
 			do {
@@ -479,7 +515,8 @@ public class Principal {
 				System.out.println("Saliendo al menu anterior...");
 				break;
 			default:
-				System.out.println("No has introducido una opcion valida." + " Por favor intentalo de nuevo.");
+				System.out.println("No has introducido una opcion valida."
+						+ " Por favor intentalo de nuevo.");
 			}
 		} while (opcion < 4);
 	}
@@ -532,7 +569,8 @@ public class Principal {
 		int opcion2 = -1;
 		do {
 			System.out.println("Que deseas hacer?");
-			System.out.println("\t1. Crear o modificar un espectaculo\n\t2. " + "Crear o modificar un numero\n\t3. "
+			System.out.println("\t1. Crear o modificar un espectaculo\n\t2. "
+					+ "Crear o modificar un numero\n\t3. "
 					+ "Asignar artistas\n\t4. Salir al menu anterior");
 			Boolean v = false;
 			do {
@@ -651,7 +689,8 @@ public class Principal {
 				switch (num2) {
 				case 1:
 					senior = true;
-					System.out.println("desde que fecha es senior? (formato yyyy-mm-dd)");
+					System.out.println(
+							"desde que fecha es senior? (formato yyyy-mm-dd)");
 					fecha = LocalDate.parse(leer.nextLine());
 					break;
 				case 2:
@@ -694,7 +733,8 @@ public class Principal {
 					break;
 				}
 				int i = 1;
-				System.out.println("indica los numeros de sus especialidades separados por comas: ");
+				System.out.println(
+						"indica los numeros de sus especialidades separados por comas: ");
 				for (Especialidad e : Especialidad.values()) {
 					System.out.println(i + "-" + e);
 					i++;
@@ -708,12 +748,16 @@ public class Principal {
 							int elegida = Integer.parseInt(s.trim());
 							b = true;
 							switch (elegida) {
-							case 1 -> especialidadesUsu.add(Especialidad.ACROBACIA);
+							case 1 ->
+								especialidadesUsu.add(Especialidad.ACROBACIA);
 							case 2 -> especialidadesUsu.add(Especialidad.HUMOR);
 							case 3 -> especialidadesUsu.add(Especialidad.MAGIA);
-							case 4 -> especialidadesUsu.add(Especialidad.EQUILIBRISMO);
-							case 5 -> especialidadesUsu.add(Especialidad.MALABARISMO);
-							default -> System.out.println("Has introducido una opcion invalida");
+							case 4 -> especialidadesUsu
+									.add(Especialidad.EQUILIBRISMO);
+							case 5 ->
+								especialidadesUsu.add(Especialidad.MALABARISMO);
+							default -> System.out.println(
+									"Has introducido una opcion invalida");
 							}
 						} catch (NumberFormatException e) {
 							System.out.println("debes introducir numeros");
@@ -736,8 +780,9 @@ public class Principal {
 		 */
 
 		do {
-			System.out.println("introduce el nombre de usuario (ten en cuenta que "
-					+ "no admitira letras con tildes o dieresis, ni espacios en blanco)");
+			System.out.println(
+					"introduce el nombre de usuario (ten en cuenta que "
+							+ "no admitira letras con tildes o dieresis, ni espacios en blanco)");
 			String cadena = leer.nextLine().trim();
 
 			if (cadena.matches("^[a-zA-Z_-]{3,}$")) {
@@ -751,8 +796,9 @@ public class Principal {
 		} while (nombreUsuario == null);
 
 		do {
-			System.out.println("por ultimo introduce una contraseña valida (debe"
-					+ " tener mas de 2 caracteres, y ningun espacio en blanco");
+			System.out
+					.println("por ultimo introduce una contraseña valida (debe"
+							+ " tener mas de 2 caracteres, y ningun espacio en blanco");
 			String pass = leer.nextLine();
 			if (pass.matches("^[^|\\s]{3,}$")) {
 				passUsuario = pass;
@@ -760,13 +806,15 @@ public class Principal {
 				System.out.println("contraseña no valida");
 		} while (passUsuario == null);
 
-		Credenciales credenciales = new Credenciales(nombreUsuario, passUsuario, perfilUsu);
+		Credenciales credenciales = new Credenciales(nombreUsuario, passUsuario,
+				perfilUsu);
 
 		if (perfilUsu == Perfil.ARTISTA) {
-			resultadoLogin = new Artista(-1, email, nombre, nacionalidad, credenciales, -1, apodo, especialidadesUsu,
-					null);
+			resultadoLogin = new Artista(-1, email, nombre, nacionalidad,
+					credenciales, -1, apodo, especialidadesUsu, null);
 		} else if (perfilUsu == Perfil.COORDINACION) {
-			resultadoLogin = new Coordinador(-1, email, nombre, nacionalidad, credenciales, -1, senior, fecha, null);
+			resultadoLogin = new Coordinador(-1, email, nombre, nacionalidad,
+					credenciales, -1, senior, fecha, null);
 		}
 
 		return resultadoLogin;
@@ -780,16 +828,19 @@ public class Principal {
 		String nuevoNombre, nuevoEmail, nuevaNac;
 
 		for (Persona p : usuariosService.getCredencialesSistema()) {
-			System.out.println("ID: " + p.getId() + " - " + p.getNombre() + ", " + p.getPerfil());
+			System.out.println("ID: " + p.getId() + " - " + p.getNombre() + ", "
+					+ p.getPerfil());
 		}
 
-		System.out.println("Indica que usuario se va a modificar (escribe su id)");
+		System.out.println(
+				"Indica que usuario se va a modificar (escribe su id)");
 		opcion = leer.nextInt();
 		leer.nextLine();
 
 		for (Persona p : PDAO.getPersonas()) {
 			if (p.getId() == opcion) {
-				System.out.println("¿Que quieres cambiar? \n\t1. nombre\\n\\t2. email\\n\\t3. nacionalidad");
+				System.out.println(
+						"¿Que quieres cambiar? \n\t1. nombre\\n\\t2. email\\n\\t3. nacionalidad");
 				cambio = leer.nextInt();
 				leer.nextLine();
 
@@ -808,14 +859,17 @@ public class Principal {
 						break;
 					} else {
 						p.setEmail(nuevoEmail);
-						resultado = "Se ha modificado el email de ID " + p.getId();
+						resultado = "Se ha modificado el email de ID "
+								+ p.getId();
 					}
 					break;
 				case 3:
 					boolean nac = false;
 					do {
-						System.out.println("introduce el id del pais al que cambia");
-						for (Entry<String, String> entrada : paises.entrySet()) {
+						System.out.println(
+								"introduce el id del pais al que cambia");
+						for (Entry<String, String> entrada : paises
+								.entrySet()) {
 							System.out.println(entrada);
 						}
 						nuevaNac = leer.nextLine().toUpperCase();
@@ -827,7 +881,8 @@ public class Principal {
 							System.out.println("Ese pais no se encuentra");
 						}
 					} while (!nac);
-					resultado = "Se ha modificado la nacionalidad de ID " + p.getId();
+					resultado = "Se ha modificado la nacionalidad de ID "
+							+ p.getId();
 					break;
 				default:
 					System.out.println("Esa no fue una opcion valida");
@@ -846,7 +901,8 @@ public class Principal {
 		ArrayList<Persona> personas = PDAO.getPersonas();
 		String dato = null;
 		for (Persona p : personas) {
-			System.out.println("ID: " + p.getId() + ", " + p.getNombre() + " - " + p.getPerfil());
+			System.out.println("ID: " + p.getId() + ", " + p.getNombre() + " - "
+					+ p.getPerfil());
 		}
 
 		long idElegido = leer.nextLong();
@@ -864,7 +920,8 @@ public class Principal {
 		// modificacion
 		// EMAIL
 		boolean modificado = false;
-		System.out.println("\t--Datos de " + personaAModificar.getNombre() + "--");
+		System.out.println(
+				"\t--Datos de " + personaAModificar.getNombre() + "--");
 		System.out.println("Email actual: [" + personaAModificar.getEmail()
 				+ "] Introduce el nuevo dato o deja vacio para continuar.");
 		dato = leer.nextLine().trim();
@@ -872,7 +929,7 @@ public class Principal {
 			if (usuariosService.comprobarEmail(dato)) {
 				personaAModificar.setEmail(dato);
 				modificado = true;
-				dato = null;				
+				dato = null;
 				System.out.println("Datos actualizados.");
 			} else {
 				System.out.println("Ese email ya esta registrado");
@@ -894,14 +951,16 @@ public class Principal {
 		String nuevaNac = null;
 		boolean nacEncontrada = false;
 		System.out.println(
-				"Nacionalidad actual: [ " + personaAModificar.getNacionalidad() + " ] Quieres cambiarla? (s/n)");
+				"Nacionalidad actual: [ " + personaAModificar.getNacionalidad()
+						+ " ] Quieres cambiarla? (s/n)");
 		dato = leer.nextLine().trim();
 		if (dato.equalsIgnoreCase("s")) {
 			do {
 				System.out.println("Introduce el ID del pais elegido:");
 
 				for (Entry<String, String> entrada : paises.entrySet()) {
-					System.out.println("ID: " + entrada.getKey() + " - " + entrada.getValue());
+					System.out.println("ID: " + entrada.getKey() + " - "
+							+ entrada.getValue());
 				}
 				String pais = leer.nextLine().toUpperCase().trim();
 				if (paises.containsKey(pais)) {
@@ -925,7 +984,8 @@ public class Principal {
 				Artista artistaAModificar = (Artista) personaAModificar;
 
 				// apodo
-				System.out.println("Apodo actual: [ " + artistaAModificar.getApodo()
+				System.out.println("Apodo actual: [ "
+						+ artistaAModificar.getApodo()
 						+ " ] Introduce el nuevo dato o deja vacio para continuar.?");
 				dato = leer.nextLine().trim();
 				if (!dato.isEmpty()) {
@@ -936,8 +996,10 @@ public class Principal {
 				}
 
 				// Especialidades
-				System.out.println("Especialidades del artista: " + artistaAModificar.getEspecialidades());
-				System.out.println("Quieres actualizar la lista COMPLETA? (s/n)");
+				System.out.println("Especialidades del artista: "
+						+ artistaAModificar.getEspecialidades());
+				System.out
+						.println("Quieres actualizar la lista COMPLETA? (s/n)");
 
 				dato = leer.nextLine().trim();
 				if (dato.equalsIgnoreCase("s")) {
@@ -945,7 +1007,8 @@ public class Principal {
 					Set<Especialidad> nuevasEspec = new HashSet<>();
 					int num = 1;
 
-					System.out.println("Indica el conjunto de las especialidades separadas por comas (ej: 1,3,4)");
+					System.out.println(
+							"Indica el conjunto de las especialidades separadas por comas (ej: 1,3,4)");
 					for (Especialidad e : Especialidad.values()) {
 						System.out.println(num + "-" + e);
 						num++;
@@ -956,7 +1019,7 @@ public class Principal {
 
 						int elegida = Integer.parseInt(s.trim());
 						Especialidad especialidadAgregada = null;
-						
+
 						switch (elegida) {
 						case 1:
 							especialidadAgregada = Especialidad.ACROBACIA;
@@ -978,7 +1041,7 @@ public class Principal {
 						}
 						if (especialidadAgregada != null) {
 							nuevasEspec.add(especialidadAgregada);
-							
+
 						}
 					}
 					if (!nuevasEspec.isEmpty()) {
@@ -987,11 +1050,41 @@ public class Principal {
 						dato = null;
 						System.out.println("Datos actualizados.");
 					}
-					//TODO enviar a la BD
+					// TODO enviar a la BD
 
 				}
 			}
 
+			// datos coordinador
+			else if (personaAModificar instanceof Coordinador) {
+				String estado = null;
+
+				Coordinador coordinadorAModificar = (Coordinador) personaAModificar;
+				if (coordinadorAModificar.isSenior()) {
+
+					//senior y fecha
+					System.out.println(coordinadorAModificar.getNombre()
+							+ " es Coordinador Senior desde "
+							+ coordinadorAModificar.getFechasenior()
+							+ ". Esto no se puede modificar.");
+
+				} else {
+					System.out.println("Quieres hacer Senior a "
+							+ coordinadorAModificar.getNombre() + " ? (s/n)");
+					dato = leer.nextLine().trim();
+					if (dato.equalsIgnoreCase("s")) {
+						boolean fechaEncontrada = false;
+						do {
+							System.out.println(
+									"Introduce la fecha desde que es Senior (formato yyyy-mm-dd)");
+							coordinadorAModificar.setFechasenior(LocalDate.parse(leer.nextLine()));
+						} while (fechaEncontrada == false);
+					}
+					dato = null;
+
+				}
+
+			}
 		}
 
 		return resultado;
