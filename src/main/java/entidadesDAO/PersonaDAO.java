@@ -39,6 +39,8 @@ public class PersonaDAO {
 			+ "LEFT JOIN artistas a ON p.id_persona = a.id_persona "
 			+ "LEFT JOIN coordinadores co ON p.id_persona = co.id_persona";
 
+	private final String SELECTPERSONA_ID = SELECTPERSONASsql + " WHERE p.id_persona = ?";
+
 	/**
 	 * MODIFICAR
 	 */
@@ -50,7 +52,6 @@ public class PersonaDAO {
 	 */
 	private final String ELIMINARUSUARIO = "";
 
-	
 	/**
 	 * CONSTRUCTOR
 	 */
@@ -339,6 +340,10 @@ public class PersonaDAO {
 		// TODO
 	}
 
+	/**
+	 * devuelve todas las filas, y contruye un artista o coordinador segun su perfil
+	 * @return arraylist de personas completas
+	 */
 	public ArrayList<Persona> getPersonas() {
 		ArrayList<Persona> personas = null;
 		PreparedStatement ps = null;
@@ -390,7 +395,7 @@ public class PersonaDAO {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}finally {
+		} finally {
 			if (rs != null) {
 				try {
 					rs.close();
@@ -408,6 +413,75 @@ public class PersonaDAO {
 		}
 
 		return personas;
+	}
+
+	/**
+	 * busca una persona por su id_persona
+	 * construye un artista o coordinador segun su perfil
+	 * @param idPersona
+	 * @return persona tipo Artista o Coordinador
+	 */
+	public Persona getPersonaId(long idPersona) {
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		Persona persona = null;
+
+		try {
+			ps = DAOF.getConexion().prepareStatement(SELECTPERSONA_ID);
+
+			ps.setLong(1, idPersona);
+			rs = ps.executeQuery();
+
+			if (rs.next()) {
+				String email = rs.getString("email");
+				String nombre = rs.getString("nombre");
+				String nacionalidad = rs.getString("nacionalidad");
+
+				Credenciales credenciales = new Credenciales(rs.getString("nombre_usuario"), rs.getString("password"),
+						Perfil.valueOf(rs.getString("perfil")));
+
+				if (credenciales.getPerfil() == Perfil.ARTISTA) {
+					long idArtista = rs.getLong("id_artista");
+					String apodo = rs.getString("apodo");
+					persona = new Artista(idPersona, email, nombre, nacionalidad, credenciales, idArtista, apodo, null,
+							null);
+				} else if (credenciales.getPerfil() == Perfil.COORDINACION) {
+					long idCoordinador = rs.getLong("id_coordinador");
+					boolean senior = rs.getBoolean("senior");
+					java.sql.Date fecha = rs.getDate("fechasenior");
+					LocalDate fechaLocal = null;
+
+					if (fecha != null) {
+						fechaLocal = fecha.toLocalDate();
+					}
+					
+					//TODO cuando tenga los espectaculos tendran que ir aqui
+
+					persona = new Coordinador(idPersona, email, nombre, nacionalidad, credenciales, idCoordinador,
+							senior, fechaLocal, null);
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					System.err.println("Error al cerrar la consulta");
+				}
+			}
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					System.err.println("Error al cerrar la conexion");
+				}
+			}
+		}
+
+		return persona;
 	}
 
 }

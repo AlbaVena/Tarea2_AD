@@ -40,30 +40,25 @@ import entidadesDAO.PersonaDAO;
 public class Principal {
 
 	static Scanner leer = new Scanner(System.in);
-	
-	//TODO eliminar usuariosservice
-	static UsuariosService usuariosService= null;
+
+	// TODO eliminar usuariosservice
+	static UsuariosService usuariosService = null;
 	static EspectaculosService espectaculosService = null;
 	static PropertiesService propertiesService = null;
-	
-	
+
 	static PersonaDAO PDAO = null;
 
-	
-	
 	static Map<String, String> paises = null;
-
 
 	public static void main(String[] args) {
 
 		// Comenzamos configurando el programa
 
-
 		propertiesService = new PropertiesService();
 		usuariosService = new UsuariosService();
-		espectaculosService = new EspectaculosService();		
+		espectaculosService = new EspectaculosService();
 		paises = cargarPaises();
-		
+
 		PDAO = new PersonaDAO();
 
 		System.out.println("**Bienvenido al Circo**");
@@ -108,9 +103,9 @@ public class Principal {
 					System.out.println("Introduce tu contraseña");
 					password = leer.nextLine();
 				} while (password == null);
-				
+
 				Persona usuarioIntento = usuariosService.login(usuario, password);
-				
+
 				if (usuarioIntento != null) {
 					switch (usuarioIntento.getPerfil()) {
 					case ARTISTA:
@@ -144,8 +139,6 @@ public class Principal {
 	/**
 	 * METODOS:
 	 */
-
-
 
 	private static Map<String, String> cargarPaises() {
 		Map<String, String> paises = new HashMap<String, String>();
@@ -203,8 +196,6 @@ public class Principal {
 		return valorNodo.getNodeValue(); // el nodo de TEXTO (valor real) NOMBRE
 	}
 
-	
-	
 	private static boolean comprobarEspectaculoRepetido(String espNombre) {
 		for (Espectaculo e : espectaculosService.getEspectaculos()) {
 			if (e.getNombre().equals(espNombre))
@@ -213,8 +204,6 @@ public class Principal {
 		return false;
 	}
 
-	
-	
 	public static Espectaculo crearEspectaculo() {
 		String nombre = null, nombrePrueba = null;
 		Boolean fechas = false;
@@ -356,10 +345,7 @@ public class Principal {
 
 		return nuevoEspectaculo;
 	}
-	
-	
-	
-	
+
 	// MENU COORDINACION
 	/**
 	 * 1. ver espectaculos 2. gestionar espectaculos 2.1 crear-modificar espectaculo
@@ -446,8 +432,6 @@ public class Principal {
 		} while (opcion != 3);
 	}
 
-
-
 	// MENU ADMIN
 	/**
 	 * 1. ver espectaculos 2. gestionar espectaculos 2.1 crear-modificar espectaculo
@@ -457,7 +441,6 @@ public class Principal {
 	 */
 	public static void menuAdmin() {
 		int opcion = -1;
-		
 
 		System.out.println("Menu Administrador");
 		do {
@@ -501,16 +484,16 @@ public class Principal {
 		} while (opcion < 4);
 	}
 
-	
 	/**
 	 * MENU gestion personas
 	 */
-	
+
 	public static void gestionarPersonas() {
 		int opcion2 = -1;
 		do {
 			System.out.println("Que deseas hacer?");
-			System.out.println("\t1. Registrar persona\n\t2. " + "Gestionar datos artista o coordinador\n\t3. Salir al menu anterior");
+			System.out.println("\t1. Registrar persona\n\t2. "
+					+ "Gestionar datos artista o coordinador\n\t3. Salir al menu anterior");
 
 			Boolean validado = false;
 			do {
@@ -532,8 +515,7 @@ public class Principal {
 			case 2:
 
 				modificarPersona();
-				
-				
+
 				break;
 			case 3:
 				System.out.println("Saliendo al menu anterior...");
@@ -545,7 +527,6 @@ public class Principal {
 
 		} while (opcion2 != 3);
 	}
-
 
 	public static void gestionarEscpectaculos() {
 		int opcion2 = -1;
@@ -584,14 +565,11 @@ public class Principal {
 		} while (opcion2 != 4);
 	}
 
-	
-	//ESTE METODO QUEDA EN VISTA PORQUE ESTA COMPUESTO POR system.out.println PRINCIPALMENTE
+	// ESTE METODO QUEDA EN VISTA PORQUE ESTA COMPUESTO POR system.out.println
+	// PRINCIPALMENTE
 	/**
-	 * pide todos los datos que componen una persona separados por
-	 * categorias
-	 * 1.datos personales
-	 * 2.datos profesionales
-	 * 3.datos de credenciales
+	 * pide todos los datos que componen una persona separados por categorias
+	 * 1.datos personales 2.datos profesionales 3.datos de credenciales
 	 * 
 	 * @return Persona completa
 	 */
@@ -631,9 +609,8 @@ public class Principal {
 			} else {
 				System.out.println("Ese pais no se encuentra");
 			}
-			
-		}
-		while (!nac);
+
+		} while (!nac);
 
 		/*
 		 * DATOS PROFESIONALES
@@ -751,7 +728,7 @@ public class Principal {
 				System.out.println("La opcion elegida no es valida");
 				break;
 			}
-			validado =true;
+			validado = true;
 		} while (!validado);
 
 		/**
@@ -782,46 +759,46 @@ public class Principal {
 			} else
 				System.out.println("contraseña no valida");
 		} while (passUsuario == null);
-		
-		
+
 		Credenciales credenciales = new Credenciales(nombreUsuario, passUsuario, perfilUsu);
-		
+
 		if (perfilUsu == Perfil.ARTISTA) {
-			resultadoLogin = new Artista(-1, email, nombre, nacionalidad, credenciales, -1, apodo, especialidadesUsu, null);
-		}
-		else if (perfilUsu == Perfil.COORDINACION) {
+			resultadoLogin = new Artista(-1, email, nombre, nacionalidad, credenciales, -1, apodo, especialidadesUsu,
+					null);
+		} else if (perfilUsu == Perfil.COORDINACION) {
 			resultadoLogin = new Coordinador(-1, email, nombre, nacionalidad, credenciales, -1, senior, fecha, null);
 		}
-		
+
 		return resultadoLogin;
 	}
-	
+
 	public static String modificarPersona() {
-		
+
 		String resultado = "No se ha modificado ningun dato.";
-		int opcion = -1, cambio = -1;;
+		int opcion = -1, cambio = -1;
+		;
 		String nuevoNombre, nuevoEmail, nuevaNac;
-		
+
 		for (Persona p : usuariosService.getCredencialesSistema()) {
-			System.out.println("ID: "+p.getId()+" - "+p.getNombre()+", "+p.getPerfil());
+			System.out.println("ID: " + p.getId() + " - " + p.getNombre() + ", " + p.getPerfil());
 		}
-		
+
 		System.out.println("Indica que usuario se va a modificar (escribe su id)");
 		opcion = leer.nextInt();
 		leer.nextLine();
-		
+
 		for (Persona p : PDAO.getPersonas()) {
 			if (p.getId() == opcion) {
 				System.out.println("¿Que quieres cambiar? \n\t1. nombre\\n\\t2. email\\n\\t3. nacionalidad");
 				cambio = leer.nextInt();
 				leer.nextLine();
-				
+
 				switch (cambio) {
 				case 1:
 					System.out.println("Introduce el nuevo nombre completo");
 					nuevoNombre = leer.nextLine();
 					p.setNombre(resultado);
-					resultado = "Se ha modificado el nombre de ID "+p.getId();
+					resultado = "Se ha modificado el nombre de ID " + p.getId();
 					break;
 				case 2:
 					System.out.println("Introduce el nuevo email)");
@@ -829,10 +806,9 @@ public class Principal {
 					if (!usuariosService.comprobarEmail(nuevoEmail)) {
 						System.out.println("Ese email ya esta registrado");
 						break;
-					}
-					else {
+					} else {
 						p.setEmail(nuevoEmail);
-						resultado = "Se ha modificado el email de ID "+p.getId();
+						resultado = "Se ha modificado el email de ID " + p.getId();
 					}
 					break;
 				case 3:
@@ -850,26 +826,175 @@ public class Principal {
 						} else {
 							System.out.println("Ese pais no se encuentra");
 						}
-					}
-					while (!nac);
-					resultado = "Se ha modificado la nacionalidad de ID "+p.getId();
+					} while (!nac);
+					resultado = "Se ha modificado la nacionalidad de ID " + p.getId();
 					break;
-					default: System.out.println("Esa no fue una opcion valida");
+				default:
+					System.out.println("Esa no fue una opcion valida");
 				}
-				
+
 			}
 		}
-		
-		
+
 		return resultado;
-		
+
 	}
-	
-	
-	
 
+	public static String modificarPersonaActualizado() {
+		String resultado = null;
+		System.out.println("Indica el id de la persona que va a modificar");
+		ArrayList<Persona> personas = PDAO.getPersonas();
+		String dato = null;
+		for (Persona p : personas) {
+			System.out.println("ID: " + p.getId() + ", " + p.getNombre() + " - " + p.getPerfil());
+		}
 
+		long idElegido = leer.nextLong();
+		leer.nextLine();
 
-	
+		if (!personas.contains(idElegido)) {
+			return "No ha elegido un id valido";
+		}
+
+		Persona personaAModificar = PDAO.getPersonaId(idElegido);
+		if (personaAModificar == null) {
+			return "no se encontro la persona";
+		}
+
+		// modificacion
+		// EMAIL
+		boolean modificado = false;
+		System.out.println("\t--Datos de " + personaAModificar.getNombre() + "--");
+		System.out.println("Email actual: [" + personaAModificar.getEmail()
+				+ "] Introduce el nuevo dato o deja vacio para continuar.");
+		dato = leer.nextLine().trim();
+		if (!dato.isEmpty()) {
+			if (usuariosService.comprobarEmail(dato)) {
+				personaAModificar.setEmail(dato);
+				modificado = true;
+				dato = null;				
+				System.out.println("Datos actualizados.");
+			} else {
+				System.out.println("Ese email ya esta registrado");
+			}
+		}
+
+		// NOMBRE
+		System.out.println("Nombre actual: [ " + personaAModificar.getNombre()
+				+ " ] Introduce el nuevo dato o deja vacio para continuar.");
+		dato = leer.nextLine().trim();
+		if (!dato.isEmpty()) {
+			personaAModificar.setNombre(dato);
+			modificado = true;
+			dato = null;
+			System.out.println("Datos actualizados.");
+		}
+
+		// nacionalidad
+		String nuevaNac = null;
+		boolean nacEncontrada = false;
+		System.out.println(
+				"Nacionalidad actual: [ " + personaAModificar.getNacionalidad() + " ] Quieres cambiarla? (s/n)");
+		dato = leer.nextLine().trim();
+		if (dato.equalsIgnoreCase("s")) {
+			do {
+				System.out.println("Introduce el ID del pais elegido:");
+
+				for (Entry<String, String> entrada : paises.entrySet()) {
+					System.out.println("ID: " + entrada.getKey() + " - " + entrada.getValue());
+				}
+				String pais = leer.nextLine().toUpperCase().trim();
+				if (paises.containsKey(pais)) {
+					nuevaNac = paises.get(pais);
+					nacEncontrada = true;
+				} else {
+					System.out.println("No se encuentra ese pais");
+				}
+
+			} while (nacEncontrada == false);
+
+			personaAModificar.setNacionalidad(nuevaNac);
+			modificado = true;
+			dato = null;
+			System.out.println("Datos actualizados.");
+
+			// datos artista
+
+			if (personaAModificar instanceof Artista) {
+
+				Artista artistaAModificar = (Artista) personaAModificar;
+
+				// apodo
+				System.out.println("Apodo actual: [ " + artistaAModificar.getApodo()
+						+ " ] Introduce el nuevo dato o deja vacio para continuar.?");
+				dato = leer.nextLine().trim();
+				if (!dato.isEmpty()) {
+					artistaAModificar.setApodo(dato);
+					modificado = true;
+					dato = null;
+					System.out.println("Datos actualizados.");
+				}
+
+				// Especialidades
+				System.out.println("Especialidades del artista: " + artistaAModificar.getEspecialidades());
+				System.out.println("Quieres actualizar la lista COMPLETA? (s/n)");
+
+				dato = leer.nextLine().trim();
+				if (dato.equalsIgnoreCase("s")) {
+
+					Set<Especialidad> nuevasEspec = new HashSet<>();
+					int num = 1;
+
+					System.out.println("Indica el conjunto de las especialidades separadas por comas (ej: 1,3,4)");
+					for (Especialidad e : Especialidad.values()) {
+						System.out.println(num + "-" + e);
+						num++;
+					}
+					String[] seleccion = leer.nextLine().split(",");
+
+					for (String s : seleccion) {
+
+						int elegida = Integer.parseInt(s.trim());
+						Especialidad especialidadAgregada = null;
+						
+						switch (elegida) {
+						case 1:
+							especialidadAgregada = Especialidad.ACROBACIA;
+							break;
+						case 2:
+							especialidadAgregada = Especialidad.HUMOR;
+							break;
+						case 3:
+							especialidadAgregada = Especialidad.MAGIA;
+							break;
+						case 4:
+							especialidadAgregada = Especialidad.EQUILIBRISMO;
+							break;
+						case 5:
+							especialidadAgregada = Especialidad.MALABARISMO;
+							break;
+						default:
+							System.out.println("Opción inválida");
+						}
+						if (especialidadAgregada != null) {
+							nuevasEspec.add(especialidadAgregada);
+							
+						}
+					}
+					if (!nuevasEspec.isEmpty()) {
+						artistaAModificar.setEspecialidades(nuevasEspec);
+						modificado = true;
+						dato = null;
+						System.out.println("Datos actualizados.");
+					}
+					//TODO enviar a la BD
+
+				}
+			}
+
+		}
+
+		return resultado;
+	}
 
 }
