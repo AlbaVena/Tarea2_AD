@@ -247,9 +247,9 @@ public class Principal {
 			} catch (DateTimeParseException e) {
 				System.out.println("fFormato de fecha incorrecto. Usa yyyy-mm-dd.");
 			}
-			Numero numero1 = new Numero("noche magica", 15.00);
-			Numero numero2 = new Numero("sonidos del aire", 12.5);
-			Numero numero3 = new Numero("baile del fuego", 18.5);
+			Numero numero1 = new Numero("noche magica", 15);
+			Numero numero2 = new Numero("sonidos del aire", 12);
+			Numero numero3 = new Numero("baile del fuego", 18);
 			numeros.add(numero1);
 			numeros.add(numero2);
 			numeros.add(numero3);
@@ -293,9 +293,9 @@ public class Principal {
 				}
 			} while (fechas == false);
 
-			Numero numero1 = new Numero("noche magica", 15.00);
-			Numero numero2 = new Numero("sonidos del aire", 12.5);
-			Numero numero3 = new Numero("baile del fuego", 18.5);
+			Numero numero1 = new Numero("noche magica", 15);
+			Numero numero2 = new Numero("sonidos del aire", 12);
+			Numero numero3 = new Numero("baile del fuego", 18);
 			numeros.add(numero1);
 			numeros.add(numero2);
 			numeros.add(numero3);
