@@ -973,6 +973,7 @@ public class Principal {
 				} else {
 					System.out.println("No se encuentra ese pais");
 				}
+			
 
 			} while (nacEncontrada == false);
 
@@ -980,6 +981,7 @@ public class Principal {
 			modificado = true;
 			dato = null;
 			System.out.println("Datos actualizados.");
+		}
 
 			// datos artista
 
@@ -1098,7 +1100,7 @@ public class Principal {
 				}
 
 			}
-		}
+		
 
 		return resultado;
 	}
