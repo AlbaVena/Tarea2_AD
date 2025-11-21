@@ -1,5 +1,6 @@
 package entidadesDAO;
 
+import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,6 +13,7 @@ import com.mysql.jdbc.Statement;
 import entidades.Artista;
 import entidades.Coordinador;
 import entidades.Credenciales;
+import entidades.Especialidad;
 import entidades.Perfil;
 import entidades.Persona;
 import factorias.DAOFactoryJDBC;
@@ -27,6 +29,7 @@ public class PersonaDAO {
 	private final String INSERTARARTISTAPS = "INSERT INTO artistas (apodo, id_persona) VALUES (?, ?)";
 	private final String INSERTARCOORDINADORPS = "INSERT INTO coordinadores (senior, fechasenior, id_persona) VALUES (?, ?, ?)";
 	private final String INSERTARCREDENCIALESPS = "INSERT INTO credenciales (nombre, password, id_persona) VALUES (?, ?, ?)";
+	private final String INSERTARARTISTAESPECIALIDADPS = "INSERT INTO artista_especialidad (id_artista, id_especialidad) VALUES (?, ?)";
 
 	/**
 	 * SELECT
@@ -40,17 +43,20 @@ public class PersonaDAO {
 			+ "LEFT JOIN coordinadores co ON p.id_persona = co.id_persona";
 
 	private final String SELECTPERSONA_ID = SELECTPERSONASsql + " WHERE p.id_persona = ?";
+	private final String SELECTESPECIALIDAD_ID = "SELECT id_especialidad FROM especialidades WHERE nombre = ?";
 
 	/**
 	 * MODIFICAR
 	 */
-	private final String MODIFICARARTISTAPS = "";
+	private final String MODIFICARPERSONAPS = "UPDATE personas SET email = ?, nombre = ?, nacionalidad = ? WHERE id_persona = ?";
+	private final String MODIFICARARTISTAPS = "UPDATE artistas SET apodo = ? WHERE id_persona = ?";
 	private final String MODIFICARCOORDINADORPS = "";
 
 	/**
 	 * ELIMINAR
 	 */
 	private final String ELIMINARUSUARIO = "";
+	private final String ELIMINARESPECIALIDADES = "DELETE FROM artista_especialidad WHERE id_artista = ?";
 
 	/**
 	 * CONSTRUCTOR
@@ -332,8 +338,137 @@ public class PersonaDAO {
 		return resultado;
 	}
 
-	public void modificarArtista() {
-		// TODO
+	public String modificarPersona(Persona persona) {
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		String resultado = null;
+
+		try {
+			ps = DAOF.getConexion().prepareStatement(MODIFICARPERSONAPS);
+
+			ps.setString(1, persona.getEmail());
+			ps.setString(2, persona.getNombre());
+			ps.setString(3, persona.getNacionalidad());
+			ps.setLong(4, persona.getId());
+
+			int filas = ps.executeUpdate();
+
+			if (filas > 0) {
+				return "Datos de persona actualizados.";
+			} else {
+				return "No se encontro el ID " + persona.getId();
+			}
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					System.err.println("Error al cerrar la consulta");
+				}
+			}
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					System.err.println("Error al cerrar la conexion");
+				}
+			}
+		}
+		return resultado;
+
+	}
+
+	public void modificarArtista(Artista artista) {
+		Connection conexion = null;
+		PreparedStatement psArt = null;
+		PreparedStatement psDelEspec = null;
+		PreparedStatement psInserEspec = null;
+		ResultSet rs = null;
+
+		try {
+			conexion = DAOF.getConexion();
+			conexion.setAutoCommit(false); // COMO en insertarArtista
+
+			// actualizar apodo
+			try {
+				psArt = conexion.prepareStatement(MODIFICARARTISTAPS);
+				psArt.setString(1, artista.getApodo());
+				psArt.setLong(2, artista.getId());
+
+				// Y actualizar
+				psArt.executeUpdate();
+
+				// eliminar las especialidades antiguas Y actualizar
+				psDelEspec = conexion.prepareStatement(ELIMINARESPECIALIDADES);
+				psDelEspec.setLong(1, artista.getId());
+				psDelEspec.executeUpdate();
+
+				for (Especialidad e : artista.getEspecialidades()) {
+
+					// insertar nuevas especialidades
+					int idEspecialidad = (int) getEspecialidadesID(e.name());
+
+					if (idEspecialidad == -1) {
+						throw new SQLException("Especialidad no encontrada. Se cancela la transacción.");
+					}
+
+					// insertar nueva relacion
+					psInserEspec = conexion.prepareStatement(INSERTARARTISTAESPECIALIDADPS);
+					psInserEspec.setLong(1, artista.getIdArt());
+					psInserEspec.setInt(2, idEspecialidad);
+
+					psInserEspec.executeUpdate();
+
+					// como se abre dentro del bucle, tambien hay que cerrarlo por si acaso
+					if (psInserEspec != null) {
+						psInserEspec.close();
+						psInserEspec = null;
+					}
+
+					// si todo ha ido bien AHORA commit
+					conexion.commit();
+
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.err.println("No se ha podido modificar apodo de artista");
+				try {
+					if (conexion != null) {
+						conexion.rollback();
+						System.err.println("Rollback.");
+					}
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+					System.err.println("Error en el roolback");
+				}
+
+			} finally {
+				if (rs != null) {
+					try {
+						rs.close();
+					} catch (SQLException e) {
+						System.err.println("Error al cerrar la consulta");
+					}
+				}
+				if (psArt != null) { psArt.close(); }
+				if (psDelEspec != null) { psDelEspec.close(); }
+				
+				if (conexion != null) {
+					conexion.setAutoCommit(true);
+					conexion.close();
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	public void modificarCoordinador() {
@@ -342,6 +477,7 @@ public class PersonaDAO {
 
 	/**
 	 * devuelve todas las filas, y contruye un artista o coordinador segun su perfil
+	 * 
 	 * @return arraylist de personas completas
 	 */
 	public ArrayList<Persona> getPersonas() {
@@ -416,8 +552,9 @@ public class PersonaDAO {
 	}
 
 	/**
-	 * busca una persona por su id_persona
-	 * construye un artista o coordinador segun su perfil
+	 * busca una persona por su id_persona construye un artista o coordinador segun
+	 * su perfil
+	 * 
 	 * @param idPersona
 	 * @return persona tipo Artista o Coordinador
 	 */
@@ -454,8 +591,8 @@ public class PersonaDAO {
 					if (fecha != null) {
 						fechaLocal = fecha.toLocalDate();
 					}
-					
-					//TODO cuando tenga los espectaculos tendran que ir aqui
+
+					// TODO cuando tenga los espectaculos tendran que ir aqui
 
 					persona = new Coordinador(idPersona, email, nombre, nacionalidad, credenciales, idCoordinador,
 							senior, fechaLocal, null);
@@ -464,7 +601,7 @@ public class PersonaDAO {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}finally {
+		} finally {
 			if (rs != null) {
 				try {
 					rs.close();
@@ -482,6 +619,47 @@ public class PersonaDAO {
 		}
 
 		return persona;
+	}
+
+	public int getEspecialidadesID(String nombreEs) {
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		int resultado = -1;
+
+		try {
+			ps = DAOF.getConexion().prepareStatement(SELECTESPECIALIDAD_ID);
+			ps.setString(1, nombreEs);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		try {
+			rs = ps.executeQuery();
+			if (rs.next()) {
+				return rs.getInt("id_especialidad");
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					System.err.println("Error al cerrar la consulta");
+				}
+			}
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					System.err.println("Error al cerrar la conexion");
+				}
+			}
+		}
+		return resultado;
+
 	}
 
 }

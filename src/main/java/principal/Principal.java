@@ -1051,13 +1051,13 @@ public class Principal {
 						System.out.println("Datos actualizados.");
 					}
 					// TODO enviar a la BD
+					PDAO.modificarArtista(artistaAModificar);
 
 				}
 			}
 
 			// datos coordinador
 			else if (personaAModificar instanceof Coordinador) {
-				String estado = null;
 
 				Coordinador coordinadorAModificar = (Coordinador) personaAModificar;
 				if (coordinadorAModificar.isSenior()) {
@@ -1077,7 +1077,16 @@ public class Principal {
 						do {
 							System.out.println(
 									"Introduce la fecha desde que es Senior (formato yyyy-mm-dd)");
+							try {
 							coordinadorAModificar.setFechasenior(LocalDate.parse(leer.nextLine()));
+							coordinadorAModificar.setSenior(true);
+							System.out.println(coordinadorAModificar.getNombre()+" es Coordinador Senior desde el "+coordinadorAModificar.getFechasenior());
+							modificado = true;
+							fechaEncontrada = true;
+							} catch (java.time.format.DateTimeParseException e) {
+								System.out.println("Formato de fecha incorrecto.");
+							}
+							
 						} while (fechaEncontrada == false);
 					}
 					dato = null;
