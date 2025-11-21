@@ -46,7 +46,6 @@ public class Principal {
 	static EspectaculosService espectaculosService = null;
 	static PropertiesService propertiesService = null;
 
-	static PersonaDAO PDAO = null;
 
 	static Map<String, String> paises = null;
 
@@ -59,7 +58,6 @@ public class Principal {
 		espectaculosService = new EspectaculosService();
 		paises = cargarPaises();
 
-		PDAO = new PersonaDAO();
 
 		System.out.println("**Bienvenido al Circo**");
 
@@ -837,7 +835,7 @@ public class Principal {
 		opcion = leer.nextInt();
 		leer.nextLine();
 
-		for (Persona p : PDAO.getPersonas()) {
+		for (Persona p : usuariosService.getCredencialesSistema()) {
 			if (p.getId() == opcion) {
 				System.out.println(
 						"¿Que quieres cambiar? \n\t1. nombre\\n\\t2. email\\n\\t3. nacionalidad");
@@ -898,7 +896,7 @@ public class Principal {
 	public static String modificarPersonaActualizado() {
 		String resultado = null;
 		System.out.println("Indica el id de la persona que va a modificar");
-		ArrayList<Persona> personas = PDAO.getPersonas();
+		ArrayList<Persona> personas = usuariosService.getCredencialesSistema();
 		String dato = null;
 		for (Persona p : personas) {
 			System.out.println("ID: " + p.getId() + ", " + p.getNombre() + " - "
@@ -912,7 +910,7 @@ public class Principal {
 			return "No ha elegido un id valido";
 		}
 
-		Persona personaAModificar = PDAO.getPersonaId(idElegido);
+		Persona personaAModificar = usuariosService.getPersona(idElegido);
 		if (personaAModificar == null) {
 			return "no se encontro la persona";
 		}
@@ -1051,7 +1049,7 @@ public class Principal {
 						System.out.println("Datos actualizados.");
 					}
 					// TODO enviar a la BD
-					PDAO.modificarArtista(artistaAModificar);
+					usuariosService.modificarArtista(artistaAModificar);
 
 				}
 			}

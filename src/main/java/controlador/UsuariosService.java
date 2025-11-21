@@ -17,7 +17,9 @@ import entidadesDAO.PersonaDAO;
 public class UsuariosService {
 
 	Sesion actual = new Sesion();
-	
+
+	static PersonaDAO PDAO = null;
+
 	/**
 	 * 
 	 * @return
@@ -29,74 +31,17 @@ public class UsuariosService {
 	public void setSesion(Sesion actual) {
 		this.actual = actual;
 	}
-	
-	
 
 	public ArrayList<Persona> getCredencialesSistema() {
-		return credencialesSistema;
+		return PDAO.getPersonas();
 	}
-
-	public void setCredencialesSistema(ArrayList<Persona> credencialesSistema) {
-		this.credencialesSistema = credencialesSistema;
-	}
-
-
-
-	ArrayList<Persona> credencialesSistema = null;
 
 	/*
 	 * constructor
 	 */
 	public UsuariosService() {
-		credencialesSistema = cargarCredenciales();
+		PDAO = new PersonaDAO();
 	}
-
-	/**
-	 * 
-	 * @param ruta
-	 * @return
-	 */
-	private ArrayList<String> leerFichero(String ruta) {
-		ArrayList<String> lineas = new ArrayList<>();
-		File archivo = new File(ruta);
-		try {
-
-			if (!archivo.exists()) {
-				FileWriter writer = new FileWriter(archivo);
-				writer.write("");
-				writer.close();
-			} else {
-
-				BufferedReader reader = new BufferedReader(new FileReader(ruta));
-				String linea;
-				while ((linea = reader.readLine()) != null) {
-					lineas.add(linea);
-				}
-				reader.close();
-
-			}
-		} catch (IOException e) {
-			System.out.println("No se ha podido cargar el fichero: " + ruta);
-		}
-
-		return lineas;
-	}
-
-	 ArrayList<Persona> cargarCredenciales() {
-		ArrayList<Persona> personas = new ArrayList<>();
-		// leer el fichero de credenciales
-		ArrayList<String> lineas = leerFichero(ProgramProperties.credenciales);
-
-		for (String linea : lineas) {
-			if (linea.contains("COORDINACION")) {
-				personas.add(new Coordinador(linea));
-			} else if (linea.contains("ARTISTA")) {
-				personas.add(new Artista(linea));
-			}
-		}
-		return personas;
-	}
-
 
 	public Persona login(String nombreUsuario, String password) {
 		Persona usuarioLogueado = null;
@@ -104,7 +49,7 @@ public class UsuariosService {
 		if (nombreUsuario.equals(ProgramProperties.usuarioAdmin) && password.equals(ProgramProperties.passwordAdmin)) {
 			usuarioLogueado = new Persona(ProgramProperties.usuarioAdmin, ProgramProperties.passwordAdmin);
 		} else {
-			for (Persona p : credencialesSistema) {
+			for (Persona p : getCredencialesSistema()) {
 				if (p.getCredenciales().getNombre().equals(nombreUsuario)
 						&& p.getCredenciales().getPassword().equals(password)) {
 					usuarioLogueado = p;
@@ -115,6 +60,10 @@ public class UsuariosService {
 			actual = new Sesion(usuarioLogueado);
 		}
 		return usuarioLogueado;
+	}
+
+	public Persona getPersona(Long id) {
+		return PDAO.getPersonaId(id);
 	}
 
 	public void logOut() {
@@ -128,30 +77,23 @@ public class UsuariosService {
 	}
 
 	public void crearPersona(Persona nueva) {
-		nueva.setId(credencialesSistema.size() + 1);
-		credencialesSistema.add(nueva);
-		//persistirCredenciales();
-		
-		/**
-		 * comprobacion de metodos:
-		 * 
-		 * 
-		 */
-		
+
 		PersonaDAO pdao = new PersonaDAO();
-		//pdao.insertarUsuario(nueva);
-		//System.out.println(pdao.insertarUsuario(nueva));   FUNCIONA
-		
-		if (nueva instanceof Artista) {
-			Artista artista = (Artista) nueva;
-			System.out.println(pdao.insertarArtista(artista));  //  FUNCIONA	
-																// TODO lo mismo para coordinador, 			
-																// y luego para credenciales
-		} else if (nueva instanceof Coordinador) {
-			Coordinador coordinador = (Coordinador) nueva;
-			System.out.println(pdao.insertarCoordinador(coordinador));
+		long idUsuario = pdao.insertarUsuario(nueva);
+
+		if (idUsuario > -1) {
+			nueva.setId(idUsuario);
+			
+			if (nueva instanceof Artista) {
+				Artista artista = (Artista) nueva;
+				System.out.println(pdao.insertarArtista(artista)); // FUNCIONA
+																	// TODO lo mismo para coordinador,
+																	// y luego para credenciales
+			} else if (nueva instanceof Coordinador) {
+				Coordinador coordinador = (Coordinador) nueva;
+				System.out.println(pdao.insertarCoordinador(coordinador));
+			}
 		}
-		
 
 	}
 
@@ -159,7 +101,7 @@ public class UsuariosService {
 		try {
 			FileWriter writer = new FileWriter(ProgramProperties.credenciales);
 			String contenido = "";
-			for (Persona p : credencialesSistema) {
+			for (Persona p : getCredencialesSistema()) {
 				contenido += p.toFicheroCredenciales() + "\n";
 			}
 			writer.write(contenido);
@@ -171,7 +113,7 @@ public class UsuariosService {
 
 	public Boolean comprobarEmail(String email) {
 		Boolean valido = true;
-		for (Persona p : credencialesSistema) {
+		for (Persona p : getCredencialesSistema()) {
 			if (p.getEmail() == email) {
 				System.out.println("Ese email ya está registrado en el sistema");
 				return false;
@@ -180,9 +122,13 @@ public class UsuariosService {
 		return valido;
 	}
 
+	public void modificarArtista(Artista artista) {
+		PDAO.modificarArtista(artista);
+	}
+
 	public Boolean comprobarNombreUsuario(String nombreUsuario) {
 		Boolean valido = true;
-		for (Persona p : credencialesSistema) {
+		for (Persona p : getCredencialesSistema()) {
 			if (p.getCredenciales().getNombre() == nombreUsuario) {
 				System.out.println("Ese nombre ya existe");
 				return false;

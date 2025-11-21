@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -133,7 +134,7 @@ public class PersonaDAO {
 		ResultSet rs = null;
 		long resultado = -1;
 
-		long idPersonaGenerado = insertarUsuario(artista); // devuelve el id_personaa
+		long idPersonaGenerado = artista.getId(); 
 
 		if (idPersonaGenerado <= 0) {
 
@@ -212,8 +213,8 @@ public class PersonaDAO {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		long resultado = -1;
-		long idPersonaGenerado = insertarUsuario(coordinador);
-
+		long idPersonaGenerado = coordinador.getId();
+		
 		if (idPersonaGenerado <= 0) {
 
 			System.err.println("Fallo al obtener el id_persona");
@@ -456,9 +457,13 @@ public class PersonaDAO {
 						System.err.println("Error al cerrar la consulta");
 					}
 				}
-				if (psArt != null) { psArt.close(); }
-				if (psDelEspec != null) { psDelEspec.close(); }
-				
+				if (psArt != null) {
+					psArt.close();
+				}
+				if (psDelEspec != null) {
+					psDelEspec.close();
+				}
+
 				if (conexion != null) {
 					conexion.setAutoCommit(true);
 					conexion.close();
@@ -474,6 +479,31 @@ public class PersonaDAO {
 	public void modificarCoordinador() {
 		// TODO
 	}
+	
+	/**
+	 * Método para pruebas de los datos devueltos en consultas
+	 * @param rs
+	 */
+	public void VerDatosResulSet(ResultSet rs) {
+		ResultSetMetaData meta;
+		try {
+			meta = rs.getMetaData();
+			
+			int columnas = meta.getColumnCount();
+
+			// Recorremos todas las filas
+			// Recorremos todas las columnas por fila
+			for (int i = 1; i <= columnas; i++) {
+				String nombreColumna = meta.getColumnLabel(i);
+				Object valor = rs.getObject(i);
+
+				System.out.print(nombreColumna + ": " + valor + " | ");
+			}
+			System.out.println(); // Salto de línea entre filas
+		} catch (SQLException e) {
+			System.err.println("No he podido ver los datos devueltos");
+		}		
+	}
 
 	/**
 	 * devuelve todas las filas, y contruye un artista o coordinador segun su perfil
@@ -481,7 +511,7 @@ public class PersonaDAO {
 	 * @return arraylist de personas completas
 	 */
 	public ArrayList<Persona> getPersonas() {
-		ArrayList<Persona> personas = null;
+		ArrayList<Persona> personas = new ArrayList<>();
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
@@ -496,36 +526,42 @@ public class PersonaDAO {
 				String nombre = rs.getString("nombre_persona");
 				String nacionalidad = rs.getString("nacionalidad");
 
+				
+
 				// de credenciales
-				Credenciales credenciales = new Credenciales(rs.getString("nombre_usuario"), rs.getString("password"),
-						Perfil.valueOf(rs.getString("perfil")));
+				String perfil = rs.getString("perfil");
+				if (perfil != null) {
+					Credenciales credenciales = new Credenciales(rs.getString("nombre_usuario"),
+							rs.getString("password"), Perfil.valueOf(perfil.toUpperCase()));
 
-				if (credenciales.getPerfil() == Perfil.ARTISTA) {
-					long idArtista = rs.getLong("id_artista");
-					String apodo = rs.getString("apodo");
+					if (credenciales.getPerfil() == Perfil.ARTISTA) {
+						long idArtista = rs.getLong("id_artista");
+						String apodo = rs.getString("apodo");
 
-					Artista nuevoArtista = new Artista(idPersona, email, nombre, nacionalidad, credenciales, idArtista,
-							apodo, null, null);
-					personas.add(nuevoArtista);
+						Artista nuevoArtista = new Artista(idPersona, email, nombre, nacionalidad, credenciales,
+								idArtista, apodo, null, null);
+						personas.add(nuevoArtista);
 
-				}
-
-				else if (credenciales.getPerfil() == Perfil.COORDINACION) {
-					long idCoordinador = rs.getLong("id_coordinador");
-					boolean senior = rs.getBoolean("senior");
-					java.sql.Date fecha = rs.getDate("fechasenior");
-					LocalDate fechaLocal = null;
-
-					if (fecha != null) {
-						fechaLocal = fecha.toLocalDate();
 					}
 
-					Coordinador nuevoCoordinador = new Coordinador(idPersona, email, nombre, nacionalidad, credenciales,
-							idCoordinador, senior, fechaLocal, null);
+					else if (credenciales.getPerfil() == Perfil.COORDINACION) {
+						long idCoordinador = rs.getLong("id_coordinador");
+						boolean senior = rs.getBoolean("senior");
+						java.sql.Date fecha = rs.getDate("fechasenior");
+						LocalDate fechaLocal = null;
 
-					personas.add(nuevoCoordinador);
+						if (fecha != null) {
+							fechaLocal = fecha.toLocalDate();
+						}
+
+						Coordinador nuevoCoordinador = new Coordinador(idPersona, email, nombre, nacionalidad,
+								credenciales, idCoordinador, senior, fechaLocal, null);
+
+						personas.add(nuevoCoordinador);
+					}
+				} else {
+					throw new SQLException("El usuario no tiene perfil, por lo que no puede devolverse");
 				}
-
 			}
 
 		} catch (SQLException e) {
@@ -574,8 +610,15 @@ public class PersonaDAO {
 				String nombre = rs.getString("nombre");
 				String nacionalidad = rs.getString("nacionalidad");
 
+				String perfilString = rs.getString("perfil");
+				if (perfilString == null || perfilString.trim().isEmpty()) {
+					throw new SQLException(
+							"Error de datos: La columna 'perfil' es NULL o está vacía para la persona con ID: "
+									+ idPersona);
+				}
+
 				Credenciales credenciales = new Credenciales(rs.getString("nombre_usuario"), rs.getString("password"),
-						Perfil.valueOf(rs.getString("perfil")));
+						Perfil.valueOf(perfilString));
 
 				if (credenciales.getPerfil() == Perfil.ARTISTA) {
 					long idArtista = rs.getLong("id_artista");
