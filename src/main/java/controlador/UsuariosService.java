@@ -123,6 +123,7 @@ public class UsuariosService {
 	}
 
 	public void modificarArtista(Artista artista) {
+
 		PDAO.modificarArtista(artista);
 	}
 

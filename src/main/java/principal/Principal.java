@@ -548,8 +548,7 @@ public class Principal {
 				usuariosService.crearPersona(registrarPersona());
 				break;
 			case 2:
-
-				modificarPersona();
+				modificarPersonaActualizado();
 
 				break;
 			case 3:
@@ -891,7 +890,7 @@ public class Principal {
 
 		return resultado;
 
-	}
+	} 
 
 	public static String modificarPersonaActualizado() {
 		String resultado = null;
@@ -905,8 +904,15 @@ public class Principal {
 
 		long idElegido = leer.nextLong();
 		leer.nextLine();
-
-		if (!personas.contains(idElegido)) {
+		
+		boolean encontrada = false;
+		for(Persona p: personas) {
+			if (p.getId() == idElegido) {
+				encontrada = true;
+			}
+		}
+		
+		if (!encontrada) {
 			return "No ha elegido un id valido";
 		}
 

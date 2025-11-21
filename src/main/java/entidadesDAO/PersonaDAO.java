@@ -385,6 +385,7 @@ public class PersonaDAO {
 
 	public void modificarArtista(Artista artista) {
 		Connection conexion = null;
+		PreparedStatement psPers = null;
 		PreparedStatement psArt = null;
 		PreparedStatement psDelEspec = null;
 		PreparedStatement psInserEspec = null;
@@ -394,8 +395,18 @@ public class PersonaDAO {
 			conexion = DAOF.getConexion();
 			conexion.setAutoCommit(false); // COMO en insertarArtista
 
+			
 			// actualizar apodo
 			try {
+				psPers = conexion.prepareStatement(MODIFICARPERSONAPS);
+
+				psPers.setString(1, artista.getEmail());
+				psPers.setString(2, artista.getNombre());
+				psPers.setString(3, artista.getNacionalidad());
+				psPers.setLong(4, artista.getId());
+
+				int filas = psPers.executeUpdate();
+				
 				psArt = conexion.prepareStatement(MODIFICARARTISTAPS);
 				psArt.setString(1, artista.getApodo());
 				psArt.setLong(2, artista.getId());
@@ -462,11 +473,6 @@ public class PersonaDAO {
 				}
 				if (psDelEspec != null) {
 					psDelEspec.close();
-				}
-
-				if (conexion != null) {
-					conexion.setAutoCommit(true);
-					conexion.close();
 				}
 			}
 		} catch (SQLException e) {
@@ -606,8 +612,11 @@ public class PersonaDAO {
 			rs = ps.executeQuery();
 
 			if (rs.next()) {
+				
+				VerDatosResulSet(rs);
+				
 				String email = rs.getString("email");
-				String nombre = rs.getString("nombre");
+				String nombre = rs.getString("nombre_persona");
 				String nacionalidad = rs.getString("nacionalidad");
 
 				String perfilString = rs.getString("perfil");
@@ -618,7 +627,7 @@ public class PersonaDAO {
 				}
 
 				Credenciales credenciales = new Credenciales(rs.getString("nombre_usuario"), rs.getString("password"),
-						Perfil.valueOf(perfilString));
+						Perfil.valueOf(perfilString.toUpperCase()));
 
 				if (credenciales.getPerfil() == Perfil.ARTISTA) {
 					long idArtista = rs.getLong("id_artista");
